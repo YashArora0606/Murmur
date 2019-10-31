@@ -2,6 +2,7 @@
 Config file with recording settings 
 
 """
+UPLOAD_URL = ''
 
 DEVICE = 'pi'
 MIC_RATE = 44100
