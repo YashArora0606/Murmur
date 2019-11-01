@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 np.set_printoptions(threshold=sys.maxsize)
 sounds = []
 channel1 = []
-frame_rate = 1000
+frame_total = 1000
 chunk_size = 1
 
 file_list = os.listdir(".")
@@ -28,12 +28,14 @@ for (index, sound) in enumerate(sounds):
     except:
         pass
 
-    sound = sound[::len(sound)//frame_rate]
+    sound = sound[::len(sound)//frame_total]
     current_loudest = 0
 
     for i in range(len(sound)):
-        volume = sound[i][0]
+        volume = sound[i][0] # ASSUMES A STEREO SOUND FILE --> Remove [0] for mono files
+        print(sound[i])
         channel1.append(abs(volume))
+        #Thresholding is for sound event determination:
         if abs(volume) > current_loudest:
             current_loudest = abs(volume)
 
@@ -55,7 +57,7 @@ def chonk_avg(arr, chunk_size):
     #Produces a new array of the average volume in each chunk of chunk size
     #New array contains (len(arr)//chunk_size) chunks
     chonks = []
-    newLen = frame_rate//chunk_size
+    newLen = frame_total//chunk_size
     for i in range(newLen + 1):
         chunksum = 0
         for val in arr[i*chunk_size : i*chunk_size + chunk_size]:
@@ -64,9 +66,9 @@ def chonk_avg(arr, chunk_size):
         chonks.append(chunksum)
     return chonks
 
-def drawPlot(channelLength, channel, plotId):
+def drawPlot(channel, plotId):
     plot = plt.figure(plotId)
-    plt.plot(range(channelLength + 1), channel)
+    plt.plot(range(len(channel)), channel)
     plt.xlabel('Time')
     plt.ylabel('Amplitude')
     plt.savefig('plot.png')
@@ -74,9 +76,9 @@ def drawPlot(channelLength, channel, plotId):
 
 
 
-g = drawPlot(frame_rate//chunk_size, channel1, 0)
-f = drawPlot(frame_rate//10, chonk_avg(channel1, 10), 1)
+g = drawPlot(channel1, 0)
+f = drawPlot(chonk_avg(channel1, 40), 1)
 plt.show()
 
-# plt.plot(range(frame_rate/chunk_size + 1), channel1)
+# plt.plot(range(frame_total/chunk_size + 1), channel1)
 
