@@ -14,7 +14,7 @@ np.set_printoptions(threshold=sys.maxsize)
 sounds = []
 channel1 = []
 increment_list = []
-frame_rate = 10
+frame_rate = 1000
 
 for i in range(frame_rate+1):
     increment_list.append(i)
