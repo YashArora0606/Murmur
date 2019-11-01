@@ -28,8 +28,8 @@ for (index, sound) in enumerate(sounds):
     except:
         pass
 
-    sound = sound[::len(sound)/frame_rate]
-    current_loudest = 0;
+    sound = sound[::len(sound)//frame_rate]
+    current_loudest = 0
 
     for i in range(len(sound)):
         volume = sound[i][0]
@@ -50,13 +50,32 @@ for i in range(len(channel1)):
 
 print(num_sounds)
 
-def summarize(arr, chunk_size):
-    pass
+def chonk_avg(arr, chunk_size):
+    #Produces a new array of the average volume in each chunk of chunk size
+    #New array contains (len(arr)//chunk_size) chunks
+    chonks = []
+    newLen = frame_rate//chunk_size
+    for i in range(newLen + 1):
+        chunksum = 0
+        for val in arr[i*chunk_size : i*chunk_size + chunk_size]:
+            chunksum += val
+        chunksum /= chunk_size
+        chonks.append(chunksum)
+    return chonks
+
+def drawPlot(channelLength, channel, plotId):
+    plot = plt.figure(plotId)
+    plt.plot(range(channelLength + 1), channel)
+    plt.xlabel('Time')
+    plt.ylabel('Amplitude')
+    plt.savefig('plot.png')
+    return plot
+
+
+
+g = drawPlot(frame_rate//chunk_size, channel1, 0)
+f = drawPlot(frame_rate//25, chonk_avg(channel1, 25), 1)
+plt.show()
 
 # plt.plot(range(frame_rate/chunk_size + 1), channel1)
-plt.plot(range(frame_rate/chunk_size + 1), channel1)
-plt.xlabel('Time')
-plt.ylabel('Amplitude')
-plt.savefig('plot.png')
 
-plt.show()
