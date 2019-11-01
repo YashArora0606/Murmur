@@ -45,6 +45,7 @@ for i in range(len(channel1)):
         # find when the sound goes back below the threshold
         # increment the number of num_sounds
         # continue from the new position of i, which is when the sound has gone below the threshold
+
         pass
 
 
@@ -74,7 +75,7 @@ def drawPlot(channelLength, channel, plotId):
 
 
 g = drawPlot(frame_rate//chunk_size, channel1, 0)
-f = drawPlot(frame_rate//25, chonk_avg(channel1, 25), 1)
+f = drawPlot(frame_rate//10, chonk_avg(channel1, 10), 1)
 plt.show()
 
 # plt.plot(range(frame_rate/chunk_size + 1), channel1)
