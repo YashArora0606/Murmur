@@ -13,12 +13,8 @@ import matplotlib.pyplot as plt
 np.set_printoptions(threshold=sys.maxsize)
 sounds = []
 channel1 = []
-increment_list = []
 frame_rate = 1000
-
-for i in range(frame_rate+1):
-    increment_list.append(i)
-
+chunk_size = 1
 
 file_list = os.listdir(".")
 for file_name in file_list:
@@ -57,7 +53,8 @@ print(num_sounds)
 def summarize(arr, chunk_size):
     pass
 
-plt.plot(increment_list, channel1)
+# plt.plot(range(frame_rate/chunk_size + 1), channel1)
+plt.plot(range(frame_rate/chunk_size + 1), channel1)
 plt.xlabel('Time')
 plt.ylabel('Amplitude')
 plt.savefig('plot.png')
