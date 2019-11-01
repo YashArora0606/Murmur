@@ -44,16 +44,31 @@ num_sounds = 0
 threshold = current_loudest/3
 
 #Finds events for a single module. Takes in 3 sound arrays - one from each microphone and a minimum volume threshold for defining events
+#Returns an array of (start index, duration) of sound events with start and duration measured in indices of the sound array
 def find_Events(s1, s2, s3, threshold): 
-    for i in range(len(sound)):
-            # find when the sound goes back below the threshold
-            # increment the number of num_sounds
-            # continue from the new position of i, which is when the sound has gone below the threshold
+    #Find the sound events for one mic
+    event_on = True
+    events = []
+    for vol in (s1):
+        if (vol > threshold and not event_on):
+            event_start = vol
+            event_on = True
+        if (vol < threshold and event_on):
+            event_dur = vol - event_start
+            event_on = False
+            events.append([event_start, event_dur])
+    
+    #Coallesce short events that are very close together
+    
 
-            #Group small sound events that are too close together
-            #Don't let a sound event endure for too long - set a max
+        
 
-            pass
+
+
+        #Group small sound events that are too close together
+        #Don't let a sound event endure for too long - set a max
+
+        pass
 
 #Takes a 1D array of volume values over time, and determines an event volume threshold
 #Returns int value
