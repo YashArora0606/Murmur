@@ -3,12 +3,23 @@ from random import random, randint
 from app import Sound
 
 def exact(grid): # takes in 3 sound objects, computes angle relative to s1 and volume of sound source (CCW angle is negative, CW is positive)
-	s1 = grid[0]
-	s2 = grid[1]
-	s3 = grid[2]
-	angle = ((s1.dir + s2.dir + s3.dir + 360) % 360) / 3
-	vol = (s1.vol + s2.vol + s3.vol) / 3
-	return Sound(angle, vol, s1.time)
+	temp = [a.dir for a in grid]
+	index = temp.index(min(temp))
+	if index == 0:
+		s1 = grid[1]
+		s2 = grid[2]
+		angle = 600
+	elif index == 1:
+		s1 = grid[0]
+		s2 = grid[2]
+		angle = 360
+	elif index == 2:
+		s1 = grid[0]
+		s2 = grid[1]
+		angle = 120
+	angle = ((angle + s1.dir + s2.dir) / 2) % 360
+	vol = (s1.vol + s2.vol) / 2
+	return Sound(vol, angle, s1.time)
 
 def gen_random(time):
 	angle = random() * 360
