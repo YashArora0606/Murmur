@@ -33,28 +33,42 @@ for (index, sound) in enumerate(sounds):
 
     for i in range(len(sound)):
         volume = sound[i][0] # ASSUMES A STEREO SOUND FILE --> Remove [0] for mono files
-        print(sound[i])
         channel1.append(abs(volume))
         #Thresholding is for sound event determination:
         if abs(volume) > current_loudest:
             current_loudest = abs(volume)
 
 num_sounds = 0
-threshold = current_loudest/4
 
-for i in range(len(channel1)):
-    if abs(channel1[i]) >= threshold:
-        # find when the sound goes back below the threshold
-        # increment the number of num_sounds
-        # continue from the new position of i, which is when the sound has gone below the threshold
+#Very primitive threshold definition
+threshold = current_loudest/3
 
-        pass
+#Finds events for a single module. Takes in 3 sound arrays - one from each microphone and a minimum volume threshold for defining events
+def find_Events(s1, s2, s3, threshold): 
+    for i in range(len(sound)):
+            # find when the sound goes back below the threshold
+            # increment the number of num_sounds
+            # continue from the new position of i, which is when the sound has gone below the threshold
 
+            #Group small sound events that are too close together
+            #Don't let a sound event endure for too long - set a max
 
-print(num_sounds)
+            pass
+
+#Takes a 1D array of volume values over time, and determines an event volume threshold
+#Returns int value
+
+#Smooth function implemented using NUMPY library. Not currently in use (Nov 1)
+def smooth(x, window_len=15):
+    s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
+    #print(len(s))
+    w=np.ones(window_len,'d')
+    y=np.convolve(w/w.sum(),s,mode='valid')
+    print(len(y))
+    return y
 
 def chonk_avg(arr, chunk_size):
-    #Produces a new array of the average volume in each chunk of chunk size
+    #Produces a new array of the average value in each chunk of  chunk_size
     #New array contains (len(arr)//chunk_size) chunks
     chonks = []
     newLen = frame_total//chunk_size
@@ -66,6 +80,8 @@ def chonk_avg(arr, chunk_size):
         chonks.append(chunksum)
     return chonks
 
+#Takes in a 1D array and plots y = val, x = index. PlotID determines the order in which the plots are displayed.
+#Plot ID is mANDATORY to display properly. Set each plot ID as one greater than the previous. 
 def drawPlot(channel, plotId):
     plot = plt.figure(plotId)
     plt.plot(range(len(channel)), channel)
@@ -75,9 +91,9 @@ def drawPlot(channel, plotId):
     return plot
 
 
-
 g = drawPlot(channel1, 0)
-f = drawPlot(chonk_avg(channel1, 40), 1)
+f = drawPlot(chonk_avg(channel1, 20), 1)
+x = drawPlot(smooth(channel1), 2)
 plt.show()
 
 # plt.plot(range(frame_total/chunk_size + 1), channel1)
