@@ -49,14 +49,13 @@ for i in range(len(channel1)):
         # find when the sound goes back below the threshold
         # increment the number of num_sounds
         # continue from the new position of i, which is when the sound has gone below the threshold
-        pass;
+        pass
 
 
 print(num_sounds)
 
-def summarize(arr, chunk_size) {
-
-}
+def summarize(arr, chunk_size):
+    pass
 
 plt.plot(increment_list, channel1)
 plt.xlabel('Time')
