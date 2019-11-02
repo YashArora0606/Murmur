@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 np.set_printoptions(threshold=sys.maxsize)
 sounds = []
 channel1 = []
+channel2 = []
+channel3 = []
 frame_total = 1000
 chunk_size = 1
 
@@ -104,9 +106,32 @@ def drawPlot(channel, plotId):
     plt.savefig('plot.png')
     return plot
 
+def determineVolumes(start_index, end_index):
+    volumes = []
+    v1 = 0
+    v2 = 0
+    v3 = 0
+
+    for i in range(start_index, end_index):
+        v1 += channel1[i]
+        v2 += channel2[i]
+        v3 += channel3[i]
+
+    v1 = v1/(end_index - start_index)
+    v2 = v2/(end_index - start_index)
+    v3 = v3/(end_index - start_index)
+
+    volumes.append(v1)
+    volumes.append(v2)
+    volumes.append(v3)
+
+    return volumes
+
+
+
 
 # g = drawPlot(channel1, 0)
-# f = drawPlot(chonk_avg(channel1, 20), 1) 
+# f = drawPlot(chonk_avg(channel1, 20), 1)
 f = drawPlot(smooth(channel1), 1)
 x = drawPlot(smooth(smooth(smooth(smooth(smooth(smooth(smooth(channel1))))))), 2)
 plt.show()
