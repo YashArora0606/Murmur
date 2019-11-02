@@ -44,44 +44,6 @@ for (index, sound) in enumerate(sounds):
 
 num_sounds = 0
 
-#Very primitive threshold definition
-#Takes the SUMMARIZED/chunked sound array and returns the threshold value
-def find_event_thresh(arr):
-    max_vol = 0
-    for vol in arr:
-        if vol > max_vol:
-            max_vol = vol
-    return max_vol/3
-
-
-
-#Finds events for a single module. Takes in 3 event arrays - one from each microphone and a minimum volume threshold for defining events
-#Returns an array of (start index, duration) of sound events with start and duration measured in indices of the sound array
-def find_module_events(e1, e2, e3):
-    #Don't let a sound event endure for too long - set a max
-    pass
-
-#Find the sound events for one mic
-#Same return format as find_module_events
-def find_mic_events(sound, threshold):
-    event_on = False
-    events = []
-    print(threshold)
-    for i in range(len(sound)):
-        vol = sound[i]
-        if (vol > threshold and not event_on):
-            event_start = i
-            event_on = True
-        if (vol < threshold and event_on):
-            event_dur = i - event_start
-            event_on = False
-            events.append([event_start, event_dur])
-   #ADD FEATURE: Coallesce short events that are very close together
-    return events
-
-#Takes a 1D array of volume values over time, and determines an event volume threshold
-#Returns int value
-
 #Smooth function implemented using NUMPY library. Not currently in use (Nov 1)
 def smooth(x, window_len=15):
     s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
@@ -91,6 +53,7 @@ def smooth(x, window_len=15):
     print(len(y))
     return y
 
+#Smoothing function that is currently in use
 def chonk_avg(arr, chunk_size):
     #Produces a new array of the average value in each chunk of  chunk_size
     #New array contains (len(arr)//chunk_size) chunks
@@ -103,6 +66,44 @@ def chonk_avg(arr, chunk_size):
         chunksum /= chunk_size
         chonks.append(chunksum)
     return chonks
+
+#Finds events for a single module. Takes in 3 sound arrays - one from each microphone and a minimum volume threshold for defining events
+#Returns an array of (start index, duration) of sound events with start and duration measured in indices of the sound array
+def find_module_events(s1, s2, s3):
+    #Don't let a sound event endure for too long - set a max
+    pass
+
+#HELPER FUNCTION for find module events
+#Very primitive threshold definition
+#Takes the SUMMARIZED/chunked sound array and returns the threshold value
+def find_event_thresh(arr):
+    max_vol = 0
+    for vol in arr:
+        if vol > max_vol:
+            max_vol = vol
+    return max_vol/3
+
+#HELPER FUNCTION for find module events
+#Find the sound events for one mic given a threshold and sound array
+#Same return format as find_module_events but for one mic
+def find_mic_events(sound, threshold):
+    event_on = False
+    events = []
+    print(threshold)
+    for i in range(len(sound)):
+        vol = sound[i]
+        if (vol > threshold and not event_on):
+            event_start = i
+            event_on = True
+        if (vol < threshold and event_on):
+            event_end = i
+            event_on = False
+            events.append([event_start, event_end])
+   #ADD FEATURE: Coallesce short events that are very close together
+    return events
+
+#Takes a 1D array of volume values over time, and determines an event volume threshold
+#Returns int value
 
 #Takes in a 1D array and plots y = val, x = index. PlotID determines the order in which the plots are displayed.
 #Plot ID is mANDATORY to display properly. Set each plot ID as one greater than the previous.
