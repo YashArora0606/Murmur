@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 np.set_printoptions(threshold=sys.maxsize)
 sounds = []
 channel1 = []
+channel2 = []
+channel3 = []
 frame_total = 1000
 chunk_size = 1
 
@@ -22,6 +24,8 @@ for file_name in file_list:
         sample_rate, data = read(file_name) # assuming sample rates are the same
         sounds.append(data)
 
+current_loudest = 0
+
 for (index, sound) in enumerate(sounds):
     try:
         sound = sounds[:,0] + sounds[:,1]
@@ -29,7 +33,7 @@ for (index, sound) in enumerate(sounds):
         pass
 
     sound = sound[::len(sound)//frame_total]
-    current_loudest = 0
+
 
     for i in range(len(sound)):
         volume = sound[i][0] # ASSUMES A STEREO SOUND FILE --> Remove [0] for mono files
@@ -53,7 +57,7 @@ def find_event_thresh(arr):
 
 #Finds events for a single module. Takes in 3 event arrays - one from each microphone and a minimum volume threshold for defining events
 #Returns an array of (start index, duration) of sound events with start and duration measured in indices of the sound array
-def find_module_events(e1, e2, e3): 
+def find_module_events(e1, e2, e3):
     #Don't let a sound event endure for too long - set a max
     pass
 
@@ -101,7 +105,7 @@ def chonk_avg(arr, chunk_size):
     return chonks
 
 #Takes in a 1D array and plots y = val, x = index. PlotID determines the order in which the plots are displayed.
-#Plot ID is mANDATORY to display properly. Set each plot ID as one greater than the previous. 
+#Plot ID is mANDATORY to display properly. Set each plot ID as one greater than the previous.
 def drawPlot(channel, plotId):
     plot = plt.figure(plotId)
     plt.plot(range(len(channel)), channel)
@@ -124,4 +128,3 @@ e1 = find_mic_events(smoothChannel, threshold)
 print(e1)
 
 # plt.plot(range(frame_total/chunk_size + 1), channel1)
-
