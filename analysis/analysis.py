@@ -76,8 +76,16 @@ def find_module_events(s1, s2, s3):
     e2 = find_mic_events(s2, module_thresh)
     e3 = find_mic_events(s3, module_thresh)
 
+    #Add a 3rd element to each event in the arrays to indicate whether or not the event has been considered
+    for i in e1:
+        e1[i].append(0)
+    for i in e2:
+        e2[i].append(0)
+    for i in e3:
+        e3[i].append(0)
 
-
+    
+        
     pass
 
 #HELPER FUNCTION for find module events
@@ -105,7 +113,7 @@ def find_mic_events(sound, threshold):
         if (vol < threshold and event_on):
             event_end = i
             event_on = False
-            events.append((event_start, event_end))
+            events.append([event_start, event_end])
    #ADD FEATURE: Coallesce short events that are very close together
     return events
 
