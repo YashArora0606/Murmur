@@ -41,14 +41,20 @@ for (index, sound) in enumerate(sounds):
 num_sounds = 0
 
 #Very primitive threshold definition
-threshold = current_loudest/3
+#Takes the SUMMARIZED/chunked sound array and returns the threshold value
+def find_event_thresh(arr):
+    max_vol = 0
+    for vol in arr:
+        if vol > max_vol:
+            max_vol = vol
+    return max_vol/3
+
+
 
 #Finds events for a single module. Takes in 3 event arrays - one from each microphone and a minimum volume threshold for defining events
 #Returns an array of (start index, duration) of sound events with start and duration measured in indices of the sound array
 def find_module_events(e1, e2, e3): 
     #Don't let a sound event endure for too long - set a max
-
-
     pass
 
 #Find the sound events for one mic
@@ -56,12 +62,14 @@ def find_module_events(e1, e2, e3):
 def find_mic_events(sound, threshold):
     event_on = False
     events = []
-    for vol in (sound):
+    print(threshold)
+    for i in range(len(sound)):
+        vol = sound[i]
         if (vol > threshold and not event_on):
-            event_start = vol
+            event_start = i
             event_on = True
         if (vol < threshold and event_on):
-            event_dur = vol - event_start
+            event_dur = i - event_start
             event_on = False
             events.append([event_start, event_dur])
    #ADD FEATURE: Coallesce short events that are very close together
@@ -102,11 +110,18 @@ def drawPlot(channel, plotId):
     plt.savefig('plot.png')
     return plot
 
-
+#Create plot of original sound file
 g = drawPlot(channel1, 0)
-f = drawPlot(chonk_avg(channel1, 20), 1)
-x = drawPlot(smooth(channel1), 2)
+
+smoothChannel = chonk_avg(channel1, 20)
+threshold = find_event_thresh(smoothChannel)
+
+#f = Plot of smoothed sound file
+f = drawPlot(smoothChannel, 1)
 plt.show()
+
+e1 = find_mic_events(smoothChannel, threshold)
+print(e1)
 
 # plt.plot(range(frame_total/chunk_size + 1), channel1)
 
