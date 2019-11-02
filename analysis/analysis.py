@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 from scipy.io.wavfile import read
+from math import ceil
 import os
 import re
 import matplotlib.pyplot as plt
@@ -72,21 +73,91 @@ def chonk_avg(arr, chunk_size):
 def find_module_events(s1, s2, s3):
     #Don't let a sound event endure for too long - set a max
     module_thresh = (find_event_thresh(s1) + find_event_thresh(s2) +find_event_thresh(s3))/3
-    e1 = find_mic_events(s1, module_thresh)
-    e2 = find_mic_events(s2, module_thresh)
-    e3 = find_mic_events(s3, module_thresh)
+    # e1 = find_mic_events(s1, module_thresh)
+    # e2 = find_mic_events(s2, module_thresh)
+    # e3 = find_mic_events(s3, module_thresh)
 
-    #Add a 3rd element to each event in the arrays to indicate whether or not the event has been considered
-    for i in e1:
-        e1[i].append(0)
-    for i in e2:
-        e2[i].append(0)
-    for i in e3:
-        e3[i].append(0)
-
+    e1 = [[5, 10], [15, 25], [26, 30]]
+    e2 = [[1, 4], [5, 10], [15, 25]]
     
-        
-    pass
+    #Final module list
+    e_module = e_merge_two(e1, e2)
+    print(e_module)
+
+    #Chop off the last element from all e_module list elemements
+    return e_module
+
+def e_merge_two(events1, events2):
+    e1 = events1.copy()
+    e2 = events2.copy()
+    
+    #Add a 3rd element to each event in the arrays to indicate whether or not the event has been considered
+    for i in range(len(e1)):
+        e1[i].append(False)
+    for i in range(len(e2)):
+        e2[i].append(False)
+
+    e_merge = []
+     #Merge two event lists (e1 and e2)
+    for i in  range(len(e1)):
+        if (e1[i][2] == False):
+        #Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
+            if (return_overlap(e1[i][0], e1[i][1], e2)[0] == False):
+                e_merge.append(e1[i][0:2])
+                e1[i][2] = True
+            #If there is an overlapping event
+            else:
+                #Perform the merge, append the merged, and mark them both as true
+                merged = []
+                
+                #Mark them both as true
+                e2[return_overlap(e1[i][0], e1[i][1], e2)[1]][2] = True
+                e1[i][2] = True
+                
+                #overlapped event:
+                e_overlap = e2[return_overlap(e1[i][0], e1[i][1], e2)[1]]
+                
+                #Add to the merged event list
+                merged.append(min(e_overlap[0], e1[i][0]))
+                merged.append(max(e_overlap[1], e1[i][1]))
+                e_merge.append(merged)
+
+    for i in  range(len(e2)):
+        if (e2[i][2] == False):
+        #Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
+            if (return_overlap(e2[i][0], e2[i][1], e1)[0] == False):
+                e_merge.append(e2[i][0:2])
+                e2[i][2] = True
+            #If there is an overlapping event
+            else:
+                #Perform the merge, append the merged, and mark them both as true
+                merged = []
+                
+                #Mark them both as true
+                e1[return_overlap(e2[i][0], e2[i][1], e1)[1]][2] = True
+                e2[i][2] = True
+                
+                #overlapped event:
+                e_overlap = e1[return_overlap(e2[i][0], e2[i][1], e1)[1]]
+                
+                #Add to the merged event list
+                merged.append(min(e_overlap[0], e2[i][0]))
+                merged.append(max(e_overlap[1], e2[i][1]))
+                e_merge.append(merged)
+    return e_merge
+
+
+#Return an overlap if it shares more than 65% of the shorter duration. If more than one exists, returns earlier one.
+def return_overlap(event_start,event_end,e_list):
+    for k in e_list:
+        if ((k[0] < event_end or k[1] > event_start) and k[2] == False):
+            #Check if it shares more than 65% of the shorter one
+            min_shared = ceil (0.65 * min(k[1] - k[0], event_end-event_start))
+            if (min(k[1], event_end) - max(k[0], event_start) >= min_shared):
+                #Return true and the index of k in e_list
+                return True, e_list.index(k)
+    #Didn't find any overlaps
+    return False, 0
 
 #HELPER FUNCTION for find module events
 #Very primitive threshold definition
@@ -138,9 +209,12 @@ threshold = find_event_thresh(smoothChannel)
 
 #f = Plot of smoothed sound file
 f = drawPlot(smoothChannel, 1)
-plt.show()
 
-e1 = find_mic_events(smoothChannel, threshold)
-print(e1)
+#Uncomment this to show the plots:
+# plt.show()
+
+
 
 # plt.plot(range(frame_total/chunk_size + 1), channel1)
+
+find_module_events(channel1, channel1, channel1)
