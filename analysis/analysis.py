@@ -68,9 +68,16 @@ def chonk_avg(arr, chunk_size):
     return chonks
 
 #Finds events for a single module. Takes in 3 sound arrays - one from each microphone and a minimum volume threshold for defining events
-#Returns an array of (start index, duration) of sound events with start and duration measured in indices of the sound array
+#Returns an array of (start index, duration) of sound events with start and end measured in indices of the sound array
 def find_module_events(s1, s2, s3):
     #Don't let a sound event endure for too long - set a max
+    module_thresh = (find_event_thresh(s1) + find_event_thresh(s2) +find_event_thresh(s3))/3
+    e1 = find_mic_events(s1, module_thresh)
+    e2 = find_mic_events(s2, module_thresh)
+    e3 = find_mic_events(s3, module_thresh)
+
+
+
     pass
 
 #HELPER FUNCTION for find module events
@@ -98,7 +105,7 @@ def find_mic_events(sound, threshold):
         if (vol < threshold and event_on):
             event_end = i
             event_on = False
-            events.append([event_start, event_end])
+            events.append((event_start, event_end))
    #ADD FEATURE: Coallesce short events that are very close together
     return events
 
