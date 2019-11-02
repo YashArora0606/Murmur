@@ -14,8 +14,8 @@ UPLOAD_FOLDER = 'uploads'
 x = 3 # size of grid: width
 y = 3 # size of grid: height
 # grid = [[1, 2, 3], [3, 2, 3], [2, 3, 1]]
-grid = [Sound(13, 50, 3), Sound(14, 12, 23), Sound(150, 24, 58)]
-tdelta = 5.0 # refresh delay
+grid = [13, 70, 92]
+tdelta = 3.0 # refresh delay
 # for i in range(y):
 # 	grid.append([])
 
@@ -28,10 +28,10 @@ def refresh(f, delay):
 	t = Timer(delay, f)
 	t.start()
 
-# Update sample data
+# Update sample data datetime.now().strftime('%I:%M:%S%p')
 def update():
 	global grid
-	grid = gen_random(datetime.now().strftime('%I:%M:%S%p'))
+	grid = gen_random()
 	refresh(update, tdelta)
 
 # Print info to console
@@ -62,14 +62,14 @@ def upload():
 # Home
 @app.route('/', methods = ['GET', 'POST'])
 def index():
-	global grid
+	global grid, tdelta
 	update()
 	printGrid()
 	display = exact(grid)
 	display.vol = round(display.vol, 2)
 	display.dir = round(display.dir, 2)
 	address = gen_radar(display)
-	return render_template('index.html', sound=display, address=address)
+	return render_template('index.html', sound=display, address=address, tdelta=tdelta)
 
 if __name__ == '__main__':
 	app.run(debug=True, host='0.0.0.0', port=5000)

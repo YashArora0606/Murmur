@@ -1,38 +1,39 @@
 import io, base64, random, matplotlib.pyplot as plt, pandas as pd, os, datetime, threading, numpy as np
 from random import random, randint
 from app import Sound
-from math import pi
+from math import pi, atan2, sqrt, degrees
 from threading import Timer
 from datetime import datetime
 from matplotlib import figure
 
 # Calculates exact location of sound
-def exact(grid): # takes in 3 sound objects, computes angle relative to s1 and volume of sound source (CCW angle is negative, CW is positive)
-	temp = [a.dir for a in grid]
-	index = temp.index(min(temp))
+def exact(v): # takes in a list v of 3 volumes (from 0 = top, CW); treat right = +ve x, up = +ve y
+	index = v.index(min(v))
 	if index == 0:
-		s1 = grid[1]
-		s2 = grid[2]
-		angle = 600
+		v1 = v[1]
+		v2 = v[2]
+		vec = [v1 * sqrt(3)/2 - v2 * sqrt(3)/2, -v1/2 - v2/2]
+		angle = 450 - degrees(atan2(vec[1], vec[0]))
 	elif index == 1:
-		s1 = grid[0]
-		s2 = grid[2]
-		angle = 360
+		v1 = v[0]
+		v2 = v[2]
+		vec = [-v2 * sqrt(3)/2, v1 - v2/2]
+		angle = 450 - degrees(atan2(vec[1], vec[0]))
 	elif index == 2:
-		s1 = grid[0]
-		s2 = grid[1]
-		angle = 120
-	angle = ((angle + s1.dir + s2.dir) / 2) % 360
-	vol = (s1.vol + s2.vol) / 2
-	return Sound(vol, angle, s1.time)
+		v1 = v[0]
+		v2 = v[1]
+		vec = [v2 * sqrt(3)/2, v1 - v2/2]
+		angle = 90 - degrees(atan2(vec[1], vec[0]))
+	angle %= 360
+	vol = sqrt(v1 ** 2 + v2 ** 2)
+	return Sound(vol, angle, datetime.now().strftime('%I:%M:%S%p'))
 
-# Generates random sound data for presentation
-def gen_random(time):
-	angle = random() * 360
-	volume = random() * randint(10, 37)
-	s1 = Sound(volume + randint(-5, 8), angle + randint(-3, 3), time)
-	s2 = Sound(volume + randint(-17, 25), angle + randint(-7, 13), time)
-	s3 = Sound(volume + randint(-2, 10), angle + randint(-1, 32), time)
+# Generates random sound volumes for presentation
+def gen_random():
+	volume = random() * 5 + 60
+	s1 = volume + randint(-5, 8)
+	s2 = volume + randint(-10, 16)
+	s3 = volume + randint(-2, 10)
 	return [s1, s2, s3]
 
 # Generates and saves radar image
@@ -43,18 +44,19 @@ def gen_radar(sound):
 	theta1 = -(sound.dir * pi / 180) + pi/2
 
 	plt.figure(figsize=(4, 4))
-	theta = [0, theta1]
-	r = [0, r1]
+	theta = [theta1]
+	r = [r1]
 	ax = plt.subplot(111, projection='polar')
 	ax.set_xticklabels([])
 	ax.set_yticklabels([])
-	ax.plot(theta, r, color='#f4623a')
+	ax.plot(theta, r, 'o', color='#E6ADFF', markersize=12, markerfacecolor='#E6ADFF', markeredgecolor='#E6ADFF')
 	ax.xaxis.grid(True, color='#ffffff', linestyle='-')
 	ax.yaxis.grid(True, color='#ffffff')
 	ax.spines['polar'].set_visible(False)
 	ax.set_rmin(0)
+	ax.set_rmax(120)
 
-	plt.savefig(img, format='png', transparent=True)
+	plt.savefig(img, format='png', transparent=True, bbox_inches='tight')
 	img.seek(0)
 	graph_url = base64.b64encode(img.getvalue()).decode()
 	plt.close()
