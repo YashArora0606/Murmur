@@ -73,17 +73,3 @@ def convertToVolumeList(event_list):
         volumeList.append(determineVolumes(start_id, end_id))
 
     return volumeList
-
-
-
-
-
-
-# g = drawPlot(channel1, 0)
-# f = drawPlot(chonk_avg(channel1, 20), 1)
-
-
-
-# f = an.drawPlot(channel1, 1)
-# x = an.drawPlot(an.smooth(channel1), 2)
-# plt.show()
