@@ -2,4 +2,5 @@
 pi/venv
 server/venv
 pi/output
+pi/config.py
 
