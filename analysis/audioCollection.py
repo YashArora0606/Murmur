@@ -28,16 +28,12 @@ for (index, sound) in enumerate(sounds):
 
     sound = sound[::len(sound)//frame_total]
 
-
     for i in range(len(sound)):
         volume = sound[i][0] # ASSUMES A STEREO SOUND FILE --> Remove [0] for mono files
         channel1.append(abs(volume))
         #Thresholding is for sound event determination:
         if abs(volume) > current_loudest:
             current_loudest = abs(volume)
-
-
-sample_event_list = [[10, 20], [22, 43], [36, 48]]
 
 # Takes in list of start and end times of events, converts to list of volumes of all 3 channels
 def convertToVolumeList(event_list):
