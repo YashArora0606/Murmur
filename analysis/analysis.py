@@ -130,30 +130,6 @@ def drawPlot(channel, plotId):
     plt.savefig('plot.png')
     return plot
 
-
-# Takes in start and end index, returns list of average volume of each channel during event
-def determineVolumes(start_index, end_index):
-    volumes = []
-
-    v1 = 0
-    v2 = 0
-    v3 = 0
-
-    for i in range(start_index, end_index):
-        v1 += channel1[i]
-        v2 += channel2[i]
-        v3 += channel3[i]
-
-    v1 = v1/(end_index - start_index)
-    v2 = v2/(end_index - start_index)
-    v3 = v3/(end_index - start_index)
-
-    volumes.append(v1)
-    volumes.append(v2)
-    volumes.append(v3)
-
-    return volumes
-
 #Create plot of original sound file
 g = drawPlot(channel1, 0)
 
