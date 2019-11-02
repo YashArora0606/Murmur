@@ -76,7 +76,7 @@ def find_module_events(s1, s2, s3):
     e2 = find_mic_events(s2, module_thresh)
     e3 = find_mic_events(s3, module_thresh)
 
-
+    
 
     pass
 
