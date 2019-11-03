@@ -19,32 +19,36 @@ channel2 = []
 channel3 = []
 frame_total = 1000
 chunk_size = 1
-
-file_list = os.listdir(".")
-for file_name in file_list:
-    if re.match(".*\.wav", file_name):
-        sample_rate, data = read(file_name) # assuming sample rates are the same
-        sounds.append(data)
-
-current_loudest = 0
-
-for (index, sound) in enumerate(sounds):
-    try:
-        sound = sounds[:,0] + sounds[:,1]
-    except:
-        pass
-
-    sound = sound[::len(sound)//frame_total]
-
-
-    for i in range(len(sound)):
-        volume = sound[i][0] # ASSUMES A STEREO SOUND FILE --> Remove [0] for mono files
-        channel1.append(abs(volume))
-        #Thresholding is for sound event determination:
-        if abs(volume) > current_loudest:
-            current_loudest = abs(volume)
-
 num_sounds = 0
+UPLOADS_PATH = '../server/uploads'
+
+def readfiles():
+    global sounds, channel1, frame_total
+    file_list = os.listdir(UPLOADS_PATH)
+    for file_name in file_list:
+        if re.match(".*\.wav", file_name):
+            sample_rate, data = read(os.path.join(UPLOADS_PATH, file_name)) # assuming sample rates are the same
+            sounds.append(data)
+
+    current_loudest = 0
+
+    for (index, sound) in enumerate(sounds):
+        try:
+            sound = sounds[:,0] + sounds[:,1]
+        except:
+            pass
+
+        sound = sound[::len(sound)//frame_total]
+
+
+        for i in range(len(sound)):
+            volume = sound[i][0] # ASSUMES A STEREO SOUND FILE --> Remove [0] for mono files
+            channel1.append(abs(volume))
+            #Thresholding is for sound event determination:
+            if abs(volume) > current_loudest:
+                current_loudest = abs(volume)
+
+readfiles()
 
 #Smooth function implemented using NUMPY library. Not currently in use (Nov 1)
 def smooth(x, window_len=15):
@@ -158,7 +162,7 @@ def e_merge_two(events1, events2):
 def return_overlap(event_start,event_end,e_list):
     print("return overlap")
     print("event_start, event_end: ", event_start, event_end)
-    print("e_list passed:", e_list)
+    # print("e_list passed:", e_list)
     for k in e_list:
         if (overlap(event_start, event_end, k[0], k[1]) and k[2] == False):
             print("First check")
@@ -248,10 +252,10 @@ threshold = find_event_thresh(smoothChannel)
 f = drawPlot(smoothChannel, 1)
 
 #Uncomment this to show the plots:
-# plt.show()
+#plt.show()
+#plt.plot(range(frame_total/chunk_size + 1), channel1)
 
 
-
-# plt.plot(range(frame_total/chunk_size + 1), channel1)
-
-find_module_events(channel1, channel1, channel1)
+print(find_mic_events(channel1, threshold))
+print("\n")
+print(find_module_events(channel1, channel1, channel1))

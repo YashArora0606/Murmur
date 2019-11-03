@@ -25,6 +25,7 @@ tdelta = 3.0 # refresh delay
 FILE_NAME = ''
 nSamples = 5
 
+
 # App initialization
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -86,6 +87,7 @@ def index():
 def listen():
 	global FILE_NAME
 	if request.method == 'POST':
+		print('RECEIVED')
 		f = request.files['file']
 		f.save(os.path.join('uploads', f.filename))
 		FILE_NAME = f.filename
