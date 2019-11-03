@@ -30,22 +30,25 @@ def exact(v): # takes in a list v of 3 volumes (from 0 = top, CW); treat right =
 
 # Generates random sound volumes for presentation
 def gen_random():
-	volume = random() * 5 + 60
-	s1 = volume + randint(-5, 8)
-	s2 = volume + randint(-10, 16)
-	s3 = volume + randint(-2, 10)
+	# volume = random() * 5 + 60
+	# s1 = volume + randint(-5, 8)
+	# s2 = volume + randint(-10, 16)
+	# s3 = volume + randint(-2, 10)
+	s1 = randint(40, 75)
+	s2 = randint(40, 75)
+	s3 = randint(40, 75)
 	return [s1, s2, s3]
 
 # Generates and saves radar image
-def gen_radar(sound):	
+def gen_radar(sounds):	
 	img = io.BytesIO()
 
-	r1 = sound.vol
-	theta1 = -(sound.dir * pi / 180) + pi/2
+	r1 = [sound.vol for sound in sounds]
+	theta1 = [-(sound.dir * pi / 180) + pi/2 for sound in sounds]
 
 	plt.figure(figsize=(4, 4))
-	theta = [theta1]
-	r = [r1]
+	theta = theta1
+	r = r1
 	ax = plt.subplot(111, projection='polar')
 	ax.set_xticklabels([])
 	ax.set_yticklabels([])

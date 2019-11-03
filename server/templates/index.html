@@ -11,14 +11,14 @@
   <title>murmur</title>
 
   <!-- Font Awesome Icons -->
-  <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <!-- <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css"> -->
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700" rel="stylesheet">
-  <link href='https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'>
+  <!-- <link href="https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic' rel='stylesheet' type='text/css'> -->
 
   <!-- Plugin CSS -->
-  <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet">
+  <!-- <link href="vendor/magnific-popup/magnific-popup.css" rel="stylesheet"> -->
 
   <!-- Theme CSS - Includes Bootstrap -->
   <link href="../static/creative.css" rel="stylesheet">
@@ -77,9 +77,12 @@
         <div class="col-lg-5 text-center align-self-center">
           <hr class="divider my-4" style="border-color: rgba(230, 173, 255, 0.8);">
           <h1 class="text-uppercase text-white font-weight-bold">Module 1:</h1>
-          <h3 class="text-white font-weight-bold">Volume: {{ sound.vol }} dB</h3>
-          <h3 class="text-white font-weight-bold">Direction: {{ sound.dir }}°</h3>
-          <h3 class="text-white font-weight-bold">Time: {{ sound.time }}</h3>
+          <h3 class="text-white font-weight-bold">Time: {{ data.time }}</h3>
+          <h3 class="text-white font-weight-bold">Noise level: {{ data.avgvol }} dB</h3>
+          <h3 class="text-white font-weight-bold">Sound sources: {{ data.n }}</h3>
+          <!-- <h3 class="text-white font-weight-bold">Volume: # sound.vol dB</h3>
+          <h3 class="text-white font-weight-bold">Direction: # sound.vol°</h3>
+          <h3 class="text-white font-weight-bold">Time: # sound.time</h3> -->
           <hr class="divider my-4" style="border-color: rgba(230, 173, 255, 0.8);">
         </div>
         <div class="col-lg-5 text-center align-self-center" style="vertical-align: middle;">
@@ -273,14 +276,14 @@
     </div>
   </footer>
 -->
-  <!-- Bootstrap core JavaScript -->
+  <!-- Bootstrap core JavaScript
   <script src="vendor/jquery/jquery.min.js"></script>
   <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Plugin JavaScript -->
+  Plugin JavaScript
   <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
   <script src="vendor/magnific-popup/jquery.magnific-popup.min.js"></script>
-
+  -->
   <!-- Custom scripts for this template -->
   <script src="../static/creative.min.js"></script>
 
