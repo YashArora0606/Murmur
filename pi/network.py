@@ -24,6 +24,11 @@ def upload_all(clear_after_upload = False):
             if clear_after_upload and os.path.exists(PATH+"/output/"+file_name):
                 os.remove(PATH+"/output/"+file_name)
 
+def print_file_list():
+    global file_list
+    update_file_list()
+    return bool(file_list)
+
 def main():
     update_file_list()
     upload_all()
