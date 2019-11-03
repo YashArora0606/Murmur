@@ -49,9 +49,9 @@ def process_files():
         channel3 = abs(channel3[:,0]/2) + abs(channel3[:,1]/2)
     except:
         pass
-    channel1 = channel1[::len(channel1)//frame_total]
-    channel2 = channel2[::len(channel2)//frame_total]
-    channel3 = channel3[::len(channel3)//frame_total]
+    channel1 = channel1[::len(channel1)//(frame_total-1)]
+    channel2 = channel2[::len(channel2)//(frame_total-1)]
+    channel3 = channel3[::len(channel3)//(frame_total-1)]
     print(len(channel1))
     print(len(channel2))
     print(len(channel3))
@@ -248,6 +248,43 @@ def drawPlot(channel, plotId):
     plt.savefig('plot.png')
     return plot
 
+def determineVolumes(start_index, end_index):
+    volumes = []
+
+    v1 = 0
+    v2 = 0
+    v3 = 0
+
+    for i in range(start_index, end_index):
+        v1 += channel1[i]
+        v2 += channel2[i]
+        v3 += channel3[i]
+
+    v1 = v1/(end_index - start_index)
+    v2 = v2/(end_index - start_index)
+    v3 = v3/(end_index - start_index)
+
+    volumes.append(v1)
+    volumes.append(v2)
+    volumes.append(v3)
+
+    return volumes
+
+def convertToVolumeList(event_list):
+
+    volumeList = [];
+
+    start_id = 0
+    end_id = 0
+
+    for i in range(len(event_list)):
+        start_id = event_list[i][0]
+        end_id = event_list[i][1]
+
+        volumeList.append(determineVolumes(start_id, end_id))
+
+    return volumeList
+
 #Create plot of original sound file
 #g = drawPlot(channel1, 0)
 
@@ -269,9 +306,18 @@ def drawPlot(channel, plotId):
 def main():
     read_files()
     process_files()
-    drawPlot(channel1, 0)
-    drawPlot(channel2, 1)
-    drawPlot(channel3, 2)
+
+    smooth1 = chonk_avg(channel1, 20)
+    smooth2 = chonk_avg(channel2, 20)
+    smooth3 = chonk_avg(channel3, 20)
+
+    drawPlot(smooth1, 0)
+    drawPlot(smooth2, 1)
+    drawPlot(smooth3, 2)
+
+    print(find_module_events(smooth1, smooth2, smooth3))
+
+    # plt.show()
 
 
 if __name__ == "__main__":
