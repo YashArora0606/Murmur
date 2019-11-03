@@ -13,49 +13,45 @@ import matplotlib.pyplot as plt
 # numpy list
 
 np.set_printoptions(threshold=sys.maxsize)
-sounds = []
 channel1 = []
 channel2 = []
 channel3 = []
 frame_total = 1000
 chunk_size = 1
 num_sounds = 0
-UPLOADS_PATH = '../server/uploads'
 
-def readfiles():
-    global sounds, channel1, channel2, channel3, frame_total
+UPLOADS_PATH = os.path.join(os.getcwd(),"uploads")
+
+def read_files():
+    global channel1, channel2, channel3
     file_list = os.listdir(UPLOADS_PATH)
     for file_name in file_list:
-        if re.match(".*\.wav", file_name):
-            sample_rate, data = read(os.path.join(UPLOADS_PATH, file_name)) # assuming sample rates are the same
-            sounds.append(data)
+        if re.match(r".*\.wav", file_name):
+            file_info = file_name.split("-")
+            if (file_info[1] == '0'):
+                sample_rate, channel1 = read(os.path.join(UPLOADS_PATH, file_name))
+                os.remove(os.path.join(UPLOADS_PATH, file_name))
+            elif (file_info[1] == '1'):
+                sample_rate, channel2 = read(os.path.join(UPLOADS_PATH, file_name))
+                os.remove(os.path.join(UPLOADS_PATH, file_name))
+            elif (file_info[1] == '2'):
+                sample_rate, channel3 = read(os.path.join(UPLOADS_PATH, file_name)) # assuming sample rates are the same
+                os.remove(os.path.join(UPLOADS_PATH, file_name))
 
-    current_loudest = 0
-
-    for (index, sound) in enumerate(sounds):
-        try:
-            sound = sounds[:,0] + sounds[:,1]
-        except:
-            pass
-
-        sound = sound[::len(sound)//frame_total]
-
-
-        for i in range(len(sound)):
-            volume = sound[i][0] # ASSUMES A STEREO SOUND FILE --> Remove [0] for mono files
-            channel1.append(abs(volume))
-            #Thresholding is for sound event determination:
-            if abs(volume) > current_loudest:
-                current_loudest = abs(volume)
-
-
-    # read first file, put into channel1
-    # read second file, put into channel2
-    # read third file, put into channel3
-    # delete all 3 sound files
-
-
-readfiles()
+def process_files():
+    global channel1, channel2, channel3, frame_total
+    try:
+        channel1 = abs(channel1[:,0]/2) + abs(channel1[:,1]/2)
+        channel2 = abs(channel2[:,0]/2) + abs(channel2[:,1]/2)
+        channel3 = abs(channel3[:,0]/2) + abs(channel3[:,1]/2)
+    except:
+        pass
+    channel1 = channel1[::len(channel1)//frame_total]
+    channel2 = channel2[::len(channel2)//frame_total]
+    channel3 = channel3[::len(channel3)//frame_total]
+    print(len(channel1))
+    print(len(channel2))
+    print(len(channel3))
 
 #Smooth function implemented using NUMPY library. Not currently in use (Nov 1)
 def smooth(x, window_len=15):
@@ -250,19 +246,30 @@ def drawPlot(channel, plotId):
     return plot
 
 #Create plot of original sound file
-g = drawPlot(channel1, 0)
+#g = drawPlot(channel1, 0)
 
-smoothChannel = chonk_avg(channel1, 20)
-threshold = find_event_thresh(smoothChannel)
+#smoothChannel = chonk_avg(channel1, 20)
+#threshold = find_event_thresh(smoothChannel)
 
 #f = Plot of smoothed sound file
-f = drawPlot(smoothChannel, 1)
+#f = drawPlot(smoothChannel, 1)
 
 #Uncomment this to show the plots:
 #plt.show()
 #plt.plot(range(frame_total/chunk_size + 1), channel1)
 
 
-print(find_mic_events(channel1, threshold))
-print("\n")
-print(find_module_events(channel1, channel1, channel1))
+#print(find_mic_events(channel1, threshold))
+#print("\n")
+#print(find_module_events(channel1, channel1, channel1))
+
+def main():
+    read_files()
+    process_files()
+    drawPlot(channel1, 0)
+    drawPlot(channel2, 1)
+    drawPlot(channel3, 2)
+
+
+if __name__ == "__main__":
+    main()
