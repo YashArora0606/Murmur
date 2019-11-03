@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 from scipy.io.wavfile import read
+from scipy.signal import argrelextrema
 from math import ceil
 import os
 import re
@@ -181,15 +182,33 @@ def overlap(a_start, a_end, b_start, b_end):
         return False
     return True
 
-#HELPER FUNCTION for find module events
-#Very primitive threshold definition
-#Takes the SUMMARIZED/chunked sound array and returns the threshold value
+# HELPER FUNCTION for find module events
+# Takes the SUMMARIZED/chunked sound array and returns the threshold value
+# Takes the sum of the localMinima and localMaxima  and divides by the number of these local extrema
 def find_event_thresh(arr):
-    max_vol = 0
-    for vol in arr:
-        if vol > max_vol:
-            max_vol = vol
-    return max_vol/3
+
+    # initializes a new numpy array that has the same value as the one passed in
+    numpy_arr = np.array(arr)
+
+    # Creates an array of the indices of the local extrema
+    minima = argrelextrema(numpy_arr, np.less_equal)[0]
+    maxima = argrelextrema(numpy_arr, np.greater_equal)[0]
+
+    # Adds all values of local minimums
+    sum_local_min = 0
+    for numLocalMin in np.nditer(minima):
+        sum_local_min += numpy_arr[numLocalMin]
+
+    # Adds all values of local maximums
+    sum_local_max = 0
+    for numLocalMax in np.nditer(maxima):
+        sum_local_max += numpy_arr[numLocalMax]
+
+    # Calculates threshold value
+    threshold_vol = (sum_local_min + sum_local_max) / (len(maxima) + len(minima))
+    print(threshold_vol)
+
+    return threshold_vol
 
 #HELPER FUNCTION for find module events
 #Find the sound events for one mic given a threshold and sound array
