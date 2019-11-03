@@ -1,9 +1,11 @@
 from microphone import MicrophoneInterface
 import network
+import time
 
 m = MicrophoneInterface()
 
 while True:
+    time.sleep(5)
     print("Recording...")
     m.start_streams()
     m.read_stream()
