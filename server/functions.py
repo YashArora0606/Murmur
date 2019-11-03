@@ -44,7 +44,7 @@ def gen_random():
 	return [s1, s2, s3]
 
 # Generates and saves radar image
-def gen_radar(sounds):	
+def gen_radar(sounds):
 	img = io.BytesIO()
 
 	r1 = [sound.vol for sound in sounds]
@@ -67,7 +67,7 @@ def gen_radar(sounds):
 	img.seek(0)
 	graph_url = base64.b64encode(img.getvalue()).decode()
 	plt.close()
-	
+
 	return 'data:image/png;base64,{}'.format(graph_url)
 
 def triangulate():

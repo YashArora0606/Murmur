@@ -22,7 +22,7 @@ num_sounds = 0
 
 UPLOADS_PATH = os.path.join(os.getcwd(),"uploads")
 
-def read_files():
+def read_files(clear_after_read = False):
     global channel1, channel2, channel3
     file_list = os.listdir(UPLOADS_PATH)
     for file_name in file_list:
@@ -30,13 +30,16 @@ def read_files():
             file_info = file_name.split("-")
             if (file_info[1] == '0'):
                 sample_rate, channel1 = read(os.path.join(UPLOADS_PATH, file_name))
-                os.remove(os.path.join(UPLOADS_PATH, file_name))
+                if (clear_after_read):
+                    os.remove(os.path.join(UPLOADS_PATH, file_name))
             elif (file_info[1] == '1'):
                 sample_rate, channel2 = read(os.path.join(UPLOADS_PATH, file_name))
-                os.remove(os.path.join(UPLOADS_PATH, file_name))
+                if (clear_after_read):
+                    os.remove(os.path.join(UPLOADS_PATH, file_name))
             elif (file_info[1] == '2'):
                 sample_rate, channel3 = read(os.path.join(UPLOADS_PATH, file_name)) # assuming sample rates are the same
-                os.remove(os.path.join(UPLOADS_PATH, file_name))
+                if (clear_after_read):
+                    os.remove(os.path.join(UPLOADS_PATH, file_name))
 
 def process_files():
     global channel1, channel2, channel3, frame_total
@@ -46,20 +49,17 @@ def process_files():
         channel3 = abs(channel3[:,0]/2) + abs(channel3[:,1]/2)
     except:
         pass
-    channel1 = channel1[::len(channel1)//frame_total]
-    channel2 = channel2[::len(channel2)//frame_total]
-    channel3 = channel3[::len(channel3)//frame_total]
-    print(len(channel1))
-    print(len(channel2))
-    print(len(channel3))
+    channel1 = channel1[::len(channel1)//(frame_total-1)]
+    channel2 = channel2[::len(channel2)//(frame_total-1)]
+    channel3 = channel3[::len(channel3)//(frame_total-1)]
 
 #Smooth function implemented using NUMPY library. Not currently in use (Nov 1)
-def smooth(x, window_len=15):
-    s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
+def smooth(x, window_len = 15):
+    s = np.r_[x[window_len-1:0:-1], x, x[-2:-window_len-1:-1]]
     #print(len(s))
-    w=np.ones(window_len,'d')
-    y=np.convolve(w/w.sum(),s,mode='valid')
-    print(len(y))
+    w = np.ones(window_len,'d')
+    y = np.convolve(w / w.sum(), s, mode = 'valid')
+    # print(len(y))
     return y
 
 #Smoothing function that is currently in use
@@ -92,8 +92,8 @@ def find_module_events(s1, s2, s3):
     return e_module
 
 def e_merge_two(events1, events2):
-    e1 = events1.copy()
-    e2 = events2.copy()
+    e1 = events1[:]
+    e2 = events2[:]
 
     #Add a 3rd element to each event in the arrays to indicate whether or not the event has been considered
     for i in range(len(e1)):
@@ -107,8 +107,8 @@ def e_merge_two(events1, events2):
         if (e1[i][2] == False):
         #Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
             if (return_overlap(e1[i][0], e1[i][1], e2)[0] == False):
-                print("No conflict")
-                print("")
+                # print("No conflict")
+                # print("")
                 e_merge.append(e1[i][0:2])
                 e1[i][2] = True
             #If there is an overlapping event
@@ -121,9 +121,9 @@ def e_merge_two(events1, events2):
 
                 #overlapped event:
                 e_overlap = e2[return_overlap(e1[i][0], e1[i][1], e2)[1]]
-                print("return_overlap is: ", return_overlap(e1[i][0], e1[i][1], e2))
+                # print("return_overlap is: ", return_overlap(e1[i][0], e1[i][1], e2))
                 e2[return_overlap(e1[i][0], e1[i][1], e2)[1]][2] = True
-                print("e_overlap is: ", e_overlap)
+                # print("e_overlap is: ", e_overlap)
 
                 #Add to the merged event list
                 # print("\nNew merge")
@@ -131,7 +131,7 @@ def e_merge_two(events1, events2):
                 # print("Min of: ", e_overlap[0], e1[i][0])
                 merged.append(max(e_overlap[1], e1[i][1]))
                 # print("Max of: ", e_overlap[1], e1[i][1])
-                print("Merged: ", merged)
+                # print("Merged: ", merged)
 
                 e_merge.append(merged)
 
@@ -139,7 +139,7 @@ def e_merge_two(events1, events2):
         if (e2[i][2] == False):
         #Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
             if (return_overlap(e2[i][0], e2[i][1], e1)[0] == False):
-                print("No conflict")
+                # print("No conflict")
                 e_merge.append(e2[i][0:2])
                 e2[i][2] = True
             #If there is an overlapping event
@@ -163,12 +163,12 @@ def e_merge_two(events1, events2):
 
 #Return an overlap if it shares more than 65% of the shorter duration. If more than one exists, returns earlier one.
 def return_overlap(event_start,event_end,e_list):
-    print("return overlap")
-    print("event_start, event_end: ", event_start, event_end)
+    # print("return overlap")
+    # print("event_start, event_end: ", event_start, event_end)
     # print("e_list passed:", e_list)
     for k in e_list:
         if (overlap(event_start, event_end, k[0], k[1]) and k[2] == False):
-            print("First check")
+            # print("First check")
             #Check if it shares more than 65% of the shorter one
             min_shared = ceil (0.65 * min(k[1] - k[0], event_end-event_start))
             if (min(k[1], event_end) - max(k[0], event_start) >= min_shared):
@@ -209,7 +209,7 @@ def find_event_thresh(arr):
 
     # Calculates threshold value
     threshold_vol = (sum_local_min + sum_local_max) / (len(maxima) + len(minima))
-    print(threshold_vol)
+    # print(threshold_vol)
 
     return threshold_vol
 
@@ -219,7 +219,7 @@ def find_event_thresh(arr):
 def find_mic_events(sound, threshold):
     event_on = False
     events = []
-    print(threshold)
+    # print(threshold)
     for i in range(len(sound)):
         vol = sound[i]
         if (vol > threshold and not event_on):
@@ -245,6 +245,43 @@ def drawPlot(channel, plotId):
     plt.savefig('plot.png')
     return plot
 
+def determineVolumes(start_index, end_index):
+    volumes = []
+
+    v1 = 0
+    v2 = 0
+    v3 = 0
+
+    for i in range(start_index, end_index):
+        v1 += channel1[i]
+        v2 += channel2[i]
+        v3 += channel3[i]
+
+    v1 = v1/(end_index - start_index)
+    v2 = v2/(end_index - start_index)
+    v3 = v3/(end_index - start_index)
+
+    volumes.append(v1)
+    volumes.append(v2)
+    volumes.append(v3)
+
+    return volumes
+
+def convertToVolumeList(event_list):
+
+    volumeList = [];
+
+    start_id = 0
+    end_id = 0
+
+    for i in range(len(event_list)):
+        start_id = event_list[i][0]
+        end_id = event_list[i][1]
+
+        volumeList.append(determineVolumes(start_id, end_id))
+
+    return volumeList
+
 #Create plot of original sound file
 #g = drawPlot(channel1, 0)
 
@@ -266,9 +303,18 @@ def drawPlot(channel, plotId):
 def main():
     read_files()
     process_files()
-    drawPlot(channel1, 0)
-    drawPlot(channel2, 1)
-    drawPlot(channel3, 2)
+
+    smooth1 = chonk_avg(channel1, 20)
+    smooth2 = chonk_avg(channel2, 20)
+    smooth3 = chonk_avg(channel3, 20)
+
+    drawPlot(smooth1, 0)
+    drawPlot(smooth2, 1)
+    drawPlot(smooth3, 2)
+
+    volumes_list = convertToVolumeList(find_module_events(smooth1, smooth2, smooth3))
+
+    plt.show()
 
 
 if __name__ == "__main__":
