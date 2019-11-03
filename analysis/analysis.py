@@ -77,8 +77,8 @@ def find_module_events(s1, s2, s3):
     # e2 = find_mic_events(s2, module_thresh)
     # e3 = find_mic_events(s3, module_thresh)
 
-    e1 = [[5, 8], [15, 20], [26, 30]]
-    e2 = [[1, 4], [5, 10], [15, 25]]
+    e1 = [[7, 8]] # , [15, 30], [31, 28]
+    e2 = [[5, 10]]
     
     #Final module list
     e_module = e_merge_two(e1, e2)
@@ -103,6 +103,8 @@ def e_merge_two(events1, events2):
         if (e1[i][2] == False):
         #Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
             if (return_overlap(e1[i][0], e1[i][1], e2)[0] == False):
+                print("No conflict")    
+                print("")
                 e_merge.append(e1[i][0:2])
                 e1[i][2] = True
             #If there is an overlapping event
@@ -111,12 +113,13 @@ def e_merge_two(events1, events2):
                 merged = []
                 
                 #Mark them both as true
-                e2[return_overlap(e1[i][0], e1[i][1], e2)[1]][2] = True
                 e1[i][2] = True
                 
                 #overlapped event:
                 e_overlap = e2[return_overlap(e1[i][0], e1[i][1], e2)[1]]
-                print(e_overlap)
+                print("return_overlap is: ", return_overlap(e1[i][0], e1[i][1], e2))
+                e2[return_overlap(e1[i][0], e1[i][1], e2)[1]][2] = True
+                print("e_overlap is: ", e_overlap)
 
                 #Add to the merged event list
                 # print("\nNew merge")
@@ -132,6 +135,7 @@ def e_merge_two(events1, events2):
         if (e2[i][2] == False):
         #Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
             if (return_overlap(e2[i][0], e2[i][1], e1)[0] == False):
+                print("No conflict")
                 e_merge.append(e2[i][0:2])
                 e2[i][2] = True
             #If there is an overlapping event
@@ -140,12 +144,12 @@ def e_merge_two(events1, events2):
                 merged = []
                 
                 #Mark them both as true
-                e1[return_overlap(e2[i][0], e2[i][1], e1)[1]][2] = True
                 e2[i][2] = True
                 
                 #overlapped event:
                 e_overlap = e1[return_overlap(e2[i][0], e2[i][1], e1)[1]]
-                
+                e1[return_overlap(e2[i][0], e2[i][1], e1)[1]][2] = True
+
                 #Add to the merged event list
                 merged.append(min(e_overlap[0], e2[i][0]))
                 merged.append(max(e_overlap[1], e2[i][1]))
@@ -155,16 +159,27 @@ def e_merge_two(events1, events2):
 
 #Return an overlap if it shares more than 65% of the shorter duration. If more than one exists, returns earlier one.
 def return_overlap(event_start,event_end,e_list):
+    print("return overlap")
+    print("event_start, event_end: ", event_start, event_end)
+    print("e_list passed:", e_list)
     for k in e_list:
-        if (((k[0] <= event_end and k[0] >= event_start) or (k[1] >= event_start and k[1] <= event_end)) and k[2] == False):
+        if (overlap(event_start, event_end, k[0], k[1]) and k[2] == False):
+            print("First check")
             #Check if it shares more than 65% of the shorter one
             min_shared = ceil (0.65 * min(k[1] - k[0], event_end-event_start))
             if (min(k[1], event_end) - max(k[0], event_start) >= min_shared):
                 #Return true and the index of k in e_list
-                print("return_overlap[1] is: ", e_list.index(k))
+                #print("return_overlap[1] is: ", e_list.index(k))
                 return True, e_list.index(k)
     #Didn't find any overlaps
     return False, 0
+
+def overlap(a_start, a_end, b_start, b_end):
+    if (b_start < a_start and b_end < a_start):
+        return False
+    if (b_start > a_start and b_end > a_end):
+        return False
+    return True
 
 #HELPER FUNCTION for find module events
 #Very primitive threshold definition
