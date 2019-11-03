@@ -11,4 +11,4 @@ CHANNELS = 1L
 RECORD_TIME = 10 #Length of each recording in seconds
 DEV_INDEXES = [2] #TODO: Find index from pyaudio
 OUTPUT_FILENAME = 'output.wav'
-
+MODULE_ID = 0
