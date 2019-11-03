@@ -312,7 +312,7 @@ def main():
     drawPlot(smooth2, 1)
     drawPlot(smooth3, 2)
 
-    print(find_module_events(smooth1, smooth2, smooth3))
+    volumes_list = convertToVolumeList(find_module_events(smooth1, smooth2, smooth3))
 
     plt.show()
 
