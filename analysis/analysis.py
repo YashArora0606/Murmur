@@ -73,16 +73,12 @@ def chonk_avg(arr, chunk_size):
 def find_module_events(s1, s2, s3):
     #Don't let a sound event endure for too long - set a max
     module_thresh = (find_event_thresh(s1) + find_event_thresh(s2) +find_event_thresh(s3))/3
-    # e1 = find_mic_events(s1, module_thresh)
-    # e2 = find_mic_events(s2, module_thresh)
-    # e3 = find_mic_events(s3, module_thresh)
-
-    e1 = [[7, 8]] # , [15, 30], [31, 28]
-    e2 = [[5, 10]]
+    e1 = find_mic_events(s1, module_thresh)
+    e2 = find_mic_events(s2, module_thresh)
+    e3 = find_mic_events(s3, module_thresh)
     
     #Final module list
-    e_module = e_merge_two(e1, e2)
-    print(e_module)
+    e_module = e_mergetwo(e_merge_two(e1, e2), e3)
 
     #Chop off the last element from all e_module list elemements
     return e_module
