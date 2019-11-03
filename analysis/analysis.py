@@ -77,7 +77,7 @@ def find_module_events(s1, s2, s3):
     # e2 = find_mic_events(s2, module_thresh)
     # e3 = find_mic_events(s3, module_thresh)
 
-    e1 = [[5, 10], [15, 25], [26, 30]]
+    e1 = [[5, 8], [15, 20], [26, 30]]
     e2 = [[1, 4], [5, 10], [15, 25]]
     
     #Final module list
@@ -116,10 +116,16 @@ def e_merge_two(events1, events2):
                 
                 #overlapped event:
                 e_overlap = e2[return_overlap(e1[i][0], e1[i][1], e2)[1]]
-                
+                print(e_overlap)
+
                 #Add to the merged event list
+                # print("\nNew merge")
                 merged.append(min(e_overlap[0], e1[i][0]))
+                # print("Min of: ", e_overlap[0], e1[i][0])
                 merged.append(max(e_overlap[1], e1[i][1]))
+                # print("Max of: ", e_overlap[1], e1[i][1])
+                print("Merged: ", merged)
+
                 e_merge.append(merged)
 
     for i in  range(len(e2)):
@@ -150,11 +156,12 @@ def e_merge_two(events1, events2):
 #Return an overlap if it shares more than 65% of the shorter duration. If more than one exists, returns earlier one.
 def return_overlap(event_start,event_end,e_list):
     for k in e_list:
-        if ((k[0] < event_end or k[1] > event_start) and k[2] == False):
+        if (((k[0] <= event_end and k[0] >= event_start) or (k[1] >= event_start and k[1] <= event_end)) and k[2] == False):
             #Check if it shares more than 65% of the shorter one
             min_shared = ceil (0.65 * min(k[1] - k[0], event_end-event_start))
             if (min(k[1], event_end) - max(k[0], event_start) >= min_shared):
                 #Return true and the index of k in e_list
+                print("return_overlap[1] is: ", e_list.index(k))
                 return True, e_list.index(k)
     #Didn't find any overlaps
     return False, 0
