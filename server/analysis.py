@@ -22,7 +22,7 @@ num_sounds = 0
 
 UPLOADS_PATH = os.path.join(os.getcwd(),"uploads")
 
-def read_files():
+def read_files(clear_after_read = False):
     global channel1, channel2, channel3
     file_list = os.listdir(UPLOADS_PATH)
     for file_name in file_list:
@@ -30,13 +30,16 @@ def read_files():
             file_info = file_name.split("-")
             if (file_info[1] == '0'):
                 sample_rate, channel1 = read(os.path.join(UPLOADS_PATH, file_name))
-                os.remove(os.path.join(UPLOADS_PATH, file_name))
+                if (clear_after_read):
+                    os.remove(os.path.join(UPLOADS_PATH, file_name))
             elif (file_info[1] == '1'):
                 sample_rate, channel2 = read(os.path.join(UPLOADS_PATH, file_name))
-                os.remove(os.path.join(UPLOADS_PATH, file_name))
+                if (clear_after_read):
+                    os.remove(os.path.join(UPLOADS_PATH, file_name))
             elif (file_info[1] == '2'):
                 sample_rate, channel3 = read(os.path.join(UPLOADS_PATH, file_name)) # assuming sample rates are the same
-                os.remove(os.path.join(UPLOADS_PATH, file_name))
+                if (clear_after_read):
+                    os.remove(os.path.join(UPLOADS_PATH, file_name))
 
 def process_files():
     global channel1, channel2, channel3, frame_total
@@ -54,11 +57,11 @@ def process_files():
     print(len(channel3))
 
 #Smooth function implemented using NUMPY library. Not currently in use (Nov 1)
-def smooth(x, window_len=15):
-    s=np.r_[x[window_len-1:0:-1],x,x[-2:-window_len-1:-1]]
+def smooth(x, window_len = 15):
+    s = np.r_[x[window_len-1:0:-1], x, x[-2:-window_len-1:-1]]
     #print(len(s))
-    w=np.ones(window_len,'d')
-    y=np.convolve(w/w.sum(),s,mode='valid')
+    w = np.ones(window_len,'d')
+    y = np.convolve(w / w.sum(), s, mode = 'valid')
     print(len(y))
     return y
 
