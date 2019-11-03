@@ -23,7 +23,7 @@ num_sounds = 0
 UPLOADS_PATH = '../server/uploads'
 
 def readfiles():
-    global sounds, channel1, frame_total
+    global sounds, channel1, channel2, channel3, frame_total
     file_list = os.listdir(UPLOADS_PATH)
     for file_name in file_list:
         if re.match(".*\.wav", file_name):
@@ -47,6 +47,13 @@ def readfiles():
             #Thresholding is for sound event determination:
             if abs(volume) > current_loudest:
                 current_loudest = abs(volume)
+
+
+    # read first file, put into channel1
+    # read second file, put into channel2
+    # read third file, put into channel3
+    # delete all 3 sound files
+
 
 readfiles()
 
@@ -81,7 +88,7 @@ def find_module_events(s1, s2, s3):
     e1 = find_mic_events(s1, module_thresh)
     e2 = find_mic_events(s2, module_thresh)
     e3 = find_mic_events(s3, module_thresh)
-    
+
     #Final module list
     e_module = e_merge_two(e_merge_two(e1, e2), e3)
 
@@ -91,7 +98,7 @@ def find_module_events(s1, s2, s3):
 def e_merge_two(events1, events2):
     e1 = events1.copy()
     e2 = events2.copy()
-    
+
     #Add a 3rd element to each event in the arrays to indicate whether or not the event has been considered
     for i in range(len(e1)):
         e1[i].append(False)
@@ -104,7 +111,7 @@ def e_merge_two(events1, events2):
         if (e1[i][2] == False):
         #Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
             if (return_overlap(e1[i][0], e1[i][1], e2)[0] == False):
-                print("No conflict")    
+                print("No conflict")
                 print("")
                 e_merge.append(e1[i][0:2])
                 e1[i][2] = True
@@ -112,10 +119,10 @@ def e_merge_two(events1, events2):
             else:
                 #Perform the merge, append the merged, and mark them both as true
                 merged = []
-                
+
                 #Mark them both as true
                 e1[i][2] = True
-                
+
                 #overlapped event:
                 e_overlap = e2[return_overlap(e1[i][0], e1[i][1], e2)[1]]
                 print("return_overlap is: ", return_overlap(e1[i][0], e1[i][1], e2))
@@ -143,10 +150,10 @@ def e_merge_two(events1, events2):
             else:
                 #Perform the merge, append the merged, and mark them both as true
                 merged = []
-                
+
                 #Mark them both as true
                 e2[i][2] = True
-                
+
                 #overlapped event:
                 e_overlap = e1[return_overlap(e2[i][0], e2[i][1], e1)[1]]
                 e1[return_overlap(e2[i][0], e2[i][1], e1)[1]][2] = True
