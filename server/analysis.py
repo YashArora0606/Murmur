@@ -304,9 +304,9 @@ def main():
     read_files()
     process_files()
 
-    smooth1 = chonk_avg(channel1, 5)
-    smooth2 = chonk_avg(channel2, 5)
-    smooth3 = chonk_avg(channel3, 5)
+    smooth1 = chonk_avg(channel1, 25)
+    smooth2 = chonk_avg(channel2, 25)
+    smooth3 = chonk_avg(channel3, 25)
 
     drawPlot(smooth1, 0)
     drawPlot(smooth2, 1)
