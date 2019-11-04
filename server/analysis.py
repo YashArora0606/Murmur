@@ -27,8 +27,10 @@ def read_files(clear_after_read = False):
     global channel1, channel2, channel3
     file_list = os.listdir(UPLOADS_PATH)
     for file_name in file_list:
+        print(file_list)
         if re.match(r".*\.wav", file_name):
             file_info = file_name.split("-")
+            print(file_info)
             if (file_info[1] == '0'):
                 sample_rate, channel1 = read(os.path.join(UPLOADS_PATH, file_name))
                 if (clear_after_read):
@@ -250,7 +252,7 @@ def drawPlot(channel, plotId):
     plt.plot(range(len(channel)), channel)
     plt.xlabel('Time')
     plt.ylabel('Amplitude')
-    plt.savefig('plot.png')
+    plt.savefig('./static/img/plot.png')
     return plot
 
 def determineVolumes(start_index, end_index, c1, c2, c3):
