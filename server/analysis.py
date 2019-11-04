@@ -247,7 +247,7 @@ def drawPlot(channel, plotId):
     plt.plot(range(len(channel)), channel)
     plt.xlabel('Time')
     plt.ylabel('Amplitude')
-    plt.savefig('plot.png')
+    plt.savefig('./static/img/plot.png')
     return plot
 
 def determineVolumes(start_index, end_index, c1, c2, c3):
