@@ -26,8 +26,10 @@ def read_files(clear_after_read = False):
     global channel1, channel2, channel3
     file_list = os.listdir(UPLOADS_PATH)
     for file_name in file_list:
+        print(file_list)
         if re.match(r".*\.wav", file_name):
             file_info = file_name.split("-")
+            print(file_info)
             if (file_info[1] == '0'):
                 sample_rate, channel1 = read(os.path.join(UPLOADS_PATH, file_name))
                 if (clear_after_read):
@@ -49,6 +51,7 @@ def process_files():
         channel3 = abs(channel3[:,0]/2) + abs(channel3[:,1]/2)
     except:
         pass
+    print(len(channel1))
     channel1 = channel1[::len(channel1)//(frame_total-1)]
     channel2 = channel2[::len(channel2)//(frame_total-1)]
     channel3 = channel3[::len(channel3)//(frame_total-1)]
@@ -309,9 +312,9 @@ def main():
     read_files()
     process_files()
 
-    smooth1 = chonk_avg(channel1, 25)
-    smooth2 = chonk_avg(channel2, 25)
-    smooth3 = chonk_avg(channel3, 25)
+    smooth1 = chonk_avg(channel1, 10)
+    smooth2 = chonk_avg(channel2, 10)
+    smooth3 = chonk_avg(channel3, 10)
 
     drawPlot(smooth1, 1)
     plt.axhline(y=find_event_thresh(smooth1), color='r', linestyle='-')
