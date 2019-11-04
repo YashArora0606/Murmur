@@ -81,9 +81,14 @@ def chonk_avg(arr, chunk_size):
 def find_module_events(s1, s2, s3):
     #Don't let a sound event endure for too long - set a max
     module_thresh = (find_event_thresh(s1) + find_event_thresh(s2) +find_event_thresh(s3))/3
+
     e1 = find_mic_events(s1, module_thresh)
+    print("             e1 is:", e1)
     e2 = find_mic_events(s2, module_thresh)
+    print("             e2 is:", e2)
     e3 = find_mic_events(s3, module_thresh)
+
+    print("Merge of e1 and e2:", e_merge_two(e1, e2))
 
     #Final module list
     e_module = e_merge_two(e_merge_two(e1, e2), e3)
@@ -269,7 +274,7 @@ def determineVolumes(start_index, end_index, c1, c2, c3):
 
 def convertToVolumeList(event_list, c1, c2, c3):
 
-    volumeList = [];
+    volumeList = []
 
     start_id = 0
     end_id = 0
@@ -308,15 +313,20 @@ def main():
     smooth2 = chonk_avg(channel2, 25)
     smooth3 = chonk_avg(channel3, 25)
 
-    drawPlot(smooth1, 0)
-    drawPlot(smooth2, 1)
-    drawPlot(smooth3, 2)
+    drawPlot(smooth1, 1)
+    plt.axhline(y=find_event_thresh(smooth1), color='r', linestyle='-')
+    plt.xticks(range(0, len(smooth1), 1))
+
+    drawPlot(smooth2, 2)
+    drawPlot(smooth3, 3)
 
     # print(find_module_events(smooth1, smooth2, smooth3))
     # volumes_list = convertToVolumeList(find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
     # print(volumes_list)
 
     plt.show()
+
+    find_module_events(smooth1 ,smooth2, smooth3)
 
 
 if __name__ == "__main__":
