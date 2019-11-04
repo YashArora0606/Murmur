@@ -7,10 +7,22 @@ from datetime import datetime
 from matplotlib import figure
 
 # Converts amplitude to dB
-def convert(a):
-	return 10 * log10(a)
+def convert(sounds):
+	for i in range(len(sounds)):
+		for j in range(len(sounds[i])):
+			sounds[i][j] = 10 * log10(sounds[i][j])
 
 # Calculates exact location of sound
+# def exact(v): # takes in a list v of 3 volumes (from 0 = top, CW); treat right = +ve x, up = +ve y
+# 	v1 = v[1]
+# 	v2 = v[2]
+# 	v3 = v[0]
+# 	vec = [v1 * sqrt(3)/2 - v2 * sqrt(3)/2, -v1/2 - v2/2 + v3]
+# 	angle = 450 - degrees(atan2(vec[1], vec[0]))
+# 	angle %= 360
+# 	vol = 20 * sqrt(vec[0] ** 2 + vec[1] ** 2)
+# 	return Sound(vol, angle, datetime.now().strftime('%I:%M:%S%p'))
+
 def exact(v): # takes in a list v of 3 volumes (from 0 = top, CW); treat right = +ve x, up = +ve y
 	index = v.index(min(v))
 	if index == 0:

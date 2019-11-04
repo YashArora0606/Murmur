@@ -304,17 +304,17 @@ def main():
     read_files()
     process_files()
 
-    smooth1 = chonk_avg(channel1, 20)
-    smooth2 = chonk_avg(channel2, 20)
-    smooth3 = chonk_avg(channel3, 20)
+    smooth1 = chonk_avg(channel1, 25)
+    smooth2 = chonk_avg(channel2, 25)
+    smooth3 = chonk_avg(channel3, 25)
 
     drawPlot(smooth1, 0)
     drawPlot(smooth2, 1)
     drawPlot(smooth3, 2)
 
-    print(find_module_events(smooth1, smooth2, smooth3))
-    volumes_list = convertToVolumeList(find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
-    print(volumes_list)
+    # print(find_module_events(smooth1, smooth2, smooth3))
+    # volumes_list = convertToVolumeList(find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
+    # print(volumes_list)
 
     plt.show()
 
