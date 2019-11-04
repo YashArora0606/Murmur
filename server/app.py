@@ -1,4 +1,4 @@
-import os, requests
+import os, requests, analysis as an
 from flask import *
 from functions import *
 
@@ -38,10 +38,19 @@ def refresh(f, delay):
 # Update sample data datetime.now().strftime('%I:%M:%S%p')
 def update():
 	global grid, nSamples
-	nSamples = round(random() * 8 + 1)
-	grid = []
-	for i in range(nSamples):
-		grid.append(gen_random())
+	an.read_files()
+	an.process_files()
+
+	smooth1 = an.chonk_avg(an.channel1, 20)
+	smooth2 = an.chonk_avg(an.channel2, 20)
+	smooth3 = an.chonk_avg(an.channel3, 20)
+	grid = an.convertToVolumeList(an.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
+	convert(grid)
+	nSamples = len(grid)
+	# nSamples = round(random() * 8 + 1)
+	# grid = []
+	# for i in range(nSamples):
+	# 	grid.append(gen_random())
 	# refresh(update, tdelta)
 
 # Print info to console

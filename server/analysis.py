@@ -308,15 +308,15 @@ def main():
     smooth2 = chonk_avg(channel2, 20)
     smooth3 = chonk_avg(channel3, 20)
 
-    drawPlot(smooth1, 0)
-    drawPlot(smooth2, 1)
-    drawPlot(smooth3, 2)
+    # drawPlot(smooth1, 0)
+    # drawPlot(smooth2, 1)
+    # drawPlot(smooth3, 2)
 
     print(find_module_events(smooth1, smooth2, smooth3))
     volumes_list = convertToVolumeList(find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
     print(volumes_list)
 
-    plt.show()
+    # plt.show()
 
 
 if __name__ == "__main__":
