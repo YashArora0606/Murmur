@@ -41,9 +41,9 @@ def update():
 	an.read_files()
 	an.process_files()
 
-	smooth1 = an.chonk_avg(an.channel1, 20)
-	smooth2 = an.chonk_avg(an.channel2, 20)
-	smooth3 = an.chonk_avg(an.channel3, 20)
+	smooth1 = an.chonk_avg(an.channel1, 5)
+	smooth2 = an.chonk_avg(an.channel2, 5)
+	smooth3 = an.chonk_avg(an.channel3, 5)
 	grid = an.convertToVolumeList(an.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
 	convert(grid)
 	nSamples = len(grid)
@@ -87,6 +87,7 @@ def index():
 	for display in points:
 		display.vol = round(display.vol, 2)
 		display.dir = round(display.dir, 2)
+		print(display.dir)
 	address = gen_radar(points)
 	data = genData(points)
 	return render_template('index.html', data=data, address=address, tdelta=tdelta)
