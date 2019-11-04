@@ -245,7 +245,7 @@ def drawPlot(channel, plotId):
     plt.savefig('plot.png')
     return plot
 
-def determineVolumes(start_index, end_index):
+def determineVolumes(start_index, end_index, c1, c2, c3):
     volumes = []
 
     v1 = 0
@@ -253,9 +253,9 @@ def determineVolumes(start_index, end_index):
     v3 = 0
 
     for i in range(start_index, end_index):
-        v1 += channel1[i]
-        v2 += channel2[i]
-        v3 += channel3[i]
+        v1 += c1[i]
+        v2 += c2[i]
+        v3 += c3[i]
 
     v1 = v1/(end_index - start_index)
     v2 = v2/(end_index - start_index)
@@ -267,7 +267,7 @@ def determineVolumes(start_index, end_index):
 
     return volumes
 
-def convertToVolumeList(event_list):
+def convertToVolumeList(event_list, c1, c2, c3):
 
     volumeList = [];
 
@@ -278,7 +278,7 @@ def convertToVolumeList(event_list):
         start_id = event_list[i][0]
         end_id = event_list[i][1]
 
-        volumeList.append(determineVolumes(start_id, end_id))
+        volumeList.append(determineVolumes(start_id, end_id, c1, c2, c3))
 
     return volumeList
 
@@ -312,7 +312,9 @@ def main():
     drawPlot(smooth2, 1)
     drawPlot(smooth3, 2)
 
-    volumes_list = convertToVolumeList(find_module_events(smooth1, smooth2, smooth3))
+    print(find_module_events(smooth1, smooth2, smooth3))
+    volumes_list = convertToVolumeList(find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
+    print(volumes_list)
 
     plt.show()
 
