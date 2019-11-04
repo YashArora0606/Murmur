@@ -19,6 +19,7 @@ channel3 = []
 frame_total = 1000
 chunk_size = 1
 num_sounds = 0
+zoom = 30
 
 UPLOADS_PATH = os.path.join(os.getcwd(),"uploads")
 
@@ -48,7 +49,9 @@ def process_files():
         channel2 = abs(channel2[:,0]/2) + abs(channel2[:,1]/2)
         channel3 = abs(channel3[:,0]/2) + abs(channel3[:,1]/2)
     except:
-        pass
+        channel1 = abs(channel1[:])
+        channel2 = abs(channel2[:])
+        channel3 = abs(channel3[:])
     channel1 = channel1[::len(channel1)//(frame_total-1)]
     channel2 = channel2[::len(channel2)//(frame_total-1)]
     channel3 = channel3[::len(channel3)//(frame_total-1)]
@@ -309,9 +312,9 @@ def main():
     read_files()
     process_files()
 
-    smooth1 = chonk_avg(channel1, 25)
-    smooth2 = chonk_avg(channel2, 25)
-    smooth3 = chonk_avg(channel3, 25)
+    smooth1 = chonk_avg(channel1, zoom)
+    smooth2 = chonk_avg(channel2, zoom)
+    smooth3 = chonk_avg(channel3, zoom)
 
     drawPlot(smooth1, 1)
     plt.axhline(y=find_event_thresh(smooth1), color='r', linestyle='-')
