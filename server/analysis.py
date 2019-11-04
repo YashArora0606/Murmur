@@ -309,9 +309,9 @@ def main():
     read_files()
     process_files()
 
-    smooth1 = chonk_avg(channel1, 10)
-    smooth2 = chonk_avg(channel2, 10)
-    smooth3 = chonk_avg(channel3, 10)
+    smooth1 = chonk_avg(channel1, 25)
+    smooth2 = chonk_avg(channel2, 25)
+    smooth3 = chonk_avg(channel3, 25)
 
     drawPlot(smooth1, 1)
     plt.axhline(y=find_event_thresh(smooth1), color='r', linestyle='-')
