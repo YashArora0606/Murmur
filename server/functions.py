@@ -1,10 +1,14 @@
 import io, base64, random, matplotlib.pyplot as plt, pandas as pd, os, datetime, threading, numpy as np
 from random import random, randint
 from app import Sound
-from math import pi, atan2, sqrt, degrees
+from math import pi, atan2, sqrt, degrees, log10
 from threading import Timer
 from datetime import datetime
 from matplotlib import figure
+
+# Converts amplitude to dB
+def convert(a):
+	return 10 * log10(a)
 
 # Calculates exact location of sound
 def exact(v): # takes in a list v of 3 volumes (from 0 = top, CW); treat right = +ve x, up = +ve y
