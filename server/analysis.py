@@ -19,7 +19,7 @@ channel3 = []
 frame_total = 1000
 chunk_size = 1
 num_sounds = 0
-zoom = 30
+zoom = 50
 
 UPLOADS_PATH = os.path.join(os.getcwd(),"uploads")
 
@@ -27,10 +27,10 @@ def read_files(clear_after_read = False):
     global channel1, channel2, channel3
     file_list = os.listdir(UPLOADS_PATH)
     for file_name in file_list:
-        print(file_list)
+        # print(file_list)
         if re.match(r".*\.wav", file_name):
             file_info = file_name.split("-")
-            print(file_info)
+            # print(file_info)
             if (file_info[1] == '0'):
                 sample_rate, channel1 = read(os.path.join(UPLOADS_PATH, file_name))
                 if (clear_after_read):
@@ -88,12 +88,12 @@ def find_module_events(s1, s2, s3):
     module_thresh = (find_event_thresh(s1) + find_event_thresh(s2) +find_event_thresh(s3))/3
 
     e1 = find_mic_events(s1, module_thresh)
-    print("             e1 is:", e1)
+    # print("             e1 is:", e1)
     e2 = find_mic_events(s2, module_thresh)
-    print("             e2 is:", e2)
+    # print("             e2 is:", e2)
     e3 = find_mic_events(s3, module_thresh)
 
-    print("Merge of e1 and e2:", e_merge_two(e1, e2))
+    # print("Merge of e1 and e2:", e_merge_two(e1, e2))
 
     #Final module list
     e_module = e_merge_two(e_merge_two(e1, e2), e3)

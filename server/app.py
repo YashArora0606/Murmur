@@ -87,7 +87,7 @@ def index():
 	for display in points:
 		display.vol = round(display.vol, 2)
 		display.dir = round(display.dir, 2)
-		print(display.dir)
+		# print(display.dir)
 	address = gen_radar(points)
 	data = genData(points)
 	return render_template('index.html', data=data, address=address, tdelta=tdelta)
@@ -99,7 +99,7 @@ def listen():
 	if request.method == 'POST':
 		print('RECEIVED')
 		f = request.files['file']
-		f.save(os.path.join('uploads', f.filename))
+		f.save(os.path.join('uploads2', f.filename))
 		FILE_NAME = f.filename
 		print('File name: ' + FILE_NAME)
 	return redirect('/')
