@@ -2,9 +2,6 @@ import os, requests, analysis as an
 from flask import *
 from functions import *
 
-###############################################################################
-# OBJECTS
-###############################################################################
 # Sound sample
 class Sound:
 	def __init__(self, vol = 0, direc = 0, time = 0):
@@ -19,9 +16,7 @@ class Data:
 		self.avgvol = avgvol
 		self.time = time
 
-###############################################################################
-# CONSTANTS
-###############################################################################
+# Constants
 UPLOAD_FOLDER = 'uploads'
 x = 3 # size of grid: width
 y = 3 # size of grid: height
@@ -35,9 +30,6 @@ zoom = an.zoom
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-###############################################################################
-# HELPERS
-###############################################################################
 # Run a function periodically
 def refresh(f, delay):
 	t = Timer(delay, f)
@@ -70,6 +62,7 @@ def printGrid():
 		print('-------------------------------')
 		print('Volume: ' + str(data.vol) + ', Direction: ' + str(data.dir) + ', Time: ' + str(data.time))
 		print('-------------------------------')
+	# refresh(printGrid, tdelta)
 
 # Put relevant data in Data object to send to front-end
 def genData(points):
@@ -77,9 +70,6 @@ def genData(points):
 	average = round(sum([point.vol for point in points]) / nSamples, 2)
 	return Data(nSamples, average, points[0].time)
 
-###############################################################################
-# ROUTES 
-###############################################################################
 # Upload
 @app.route('/upload', methods = ['GET', 'POST'])
 def upload():
@@ -98,6 +88,7 @@ def index():
 	for display in points:
 		display.vol = round(display.vol, 2)
 		display.dir = round(display.dir, 2)
+		# print(display.dir)
 	address = gen_radar(points)
 	data = genData(points)
 	return render_template('index.html', data=data, address=address, tdelta=tdelta)
