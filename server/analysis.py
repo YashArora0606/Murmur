@@ -19,6 +19,7 @@ channel3 = []
 frame_total = 1000
 chunk_size = 1
 num_sounds = 0
+zoom = 30
 
 UPLOADS_PATH = os.path.join(os.getcwd(),"uploads")
 
@@ -26,8 +27,10 @@ def read_files(clear_after_read = False):
     global channel1, channel2, channel3
     file_list = os.listdir(UPLOADS_PATH)
     for file_name in file_list:
+        print(file_list)
         if re.match(r".*\.wav", file_name):
             file_info = file_name.split("-")
+            print(file_info)
             if (file_info[1] == '0'):
                 sample_rate, channel1 = read(os.path.join(UPLOADS_PATH, file_name))
                 if (clear_after_read):
@@ -48,7 +51,9 @@ def process_files():
         channel2 = abs(channel2[:,0]/2) + abs(channel2[:,1]/2)
         channel3 = abs(channel3[:,0]/2) + abs(channel3[:,1]/2)
     except:
-        pass
+        channel1 = abs(channel1[:])
+        channel2 = abs(channel2[:])
+        channel3 = abs(channel3[:])
     channel1 = channel1[::len(channel1)//(frame_total-1)]
     channel2 = channel2[::len(channel2)//(frame_total-1)]
     channel3 = channel3[::len(channel3)//(frame_total-1)]
@@ -81,9 +86,14 @@ def chonk_avg(arr, chunk_size):
 def find_module_events(s1, s2, s3):
     #Don't let a sound event endure for too long - set a max
     module_thresh = (find_event_thresh(s1) + find_event_thresh(s2) +find_event_thresh(s3))/3
+
     e1 = find_mic_events(s1, module_thresh)
+    print("             e1 is:", e1)
     e2 = find_mic_events(s2, module_thresh)
+    print("             e2 is:", e2)
     e3 = find_mic_events(s3, module_thresh)
+
+    print("Merge of e1 and e2:", e_merge_two(e1, e2))
 
     #Final module list
     e_module = e_merge_two(e_merge_two(e1, e2), e3)
@@ -242,7 +252,7 @@ def drawPlot(channel, plotId):
     plt.plot(range(len(channel)), channel)
     plt.xlabel('Time')
     plt.ylabel('Amplitude')
-    plt.savefig('plot.png')
+    plt.savefig('./static/img/plot.png')
     return plot
 
 def determineVolumes(start_index, end_index, c1, c2, c3):
@@ -269,7 +279,7 @@ def determineVolumes(start_index, end_index, c1, c2, c3):
 
 def convertToVolumeList(event_list, c1, c2, c3):
 
-    volumeList = [];
+    volumeList = []
 
     start_id = 0
     end_id = 0
@@ -304,19 +314,24 @@ def main():
     read_files()
     process_files()
 
-    smooth1 = chonk_avg(channel1, 5)
-    smooth2 = chonk_avg(channel2, 5)
-    smooth3 = chonk_avg(channel3, 5)
+    smooth1 = chonk_avg(channel1, zoom)
+    smooth2 = chonk_avg(channel2, zoom)
+    smooth3 = chonk_avg(channel3, zoom)
 
-    drawPlot(smooth1, 0)
-    drawPlot(smooth2, 1)
-    drawPlot(smooth3, 2)
+    drawPlot(smooth1, 1)
+    plt.axhline(y=find_event_thresh(smooth1), color='r', linestyle='-')
+    plt.xticks(range(0, len(smooth1), 1))
+
+    drawPlot(smooth2, 2)
+    drawPlot(smooth3, 3)
 
     # print(find_module_events(smooth1, smooth2, smooth3))
     # volumes_list = convertToVolumeList(find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
     # print(volumes_list)
 
     plt.show()
+
+    find_module_events(smooth1 ,smooth2, smooth3)
 
 
 if __name__ == "__main__":

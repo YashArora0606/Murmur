@@ -91,7 +91,7 @@ def index():
 		print(display.dir)
 	address = gen_radar(points)
 	data = genData(points)
-	return render_template('index.html', data=data, address=address, tdelta=tdelta)
+	return render_template('index.html', data=data, address='static/img/plot.png', tdelta=tdelta)
 
 # Test POST Requests
 @app.route('/listen', methods = ['POST'])
