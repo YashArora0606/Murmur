@@ -12,7 +12,7 @@ class MicrophoneInterface:
         self.device_count = self.p.get_device_count()
         self.devices = [self.p.get_device_info_by_index(i) for i in range(self.device_count)]
         self.streams = []
-        self.frames = []
+        self.frames = {}
     """
     Shows devices that are recognized currently
     """
@@ -34,20 +34,20 @@ class MicrophoneInterface:
                     input = True,
                     frames_per_buffer=config.CHUNK)
                 )
+            self.frames[i] = []
 
     def close_streams(self):
         for stream in self.streams:
             stream.stop_stream()
             stream.close()
-	self.streams = []
+	    self.streams = []
     """
     Reads data in stream
     """
-    def read_stream(self):
-        for i in range(len(self.streams)):
-            self.frames.append([])
-            for j in range((config.MIC_RATE/config.CHUNK)*config.RECORD_TIME):
-                self.frames[i].append(self.streams[i].read(config.CHUNK))
+    def read_streams(self):
+        for i in range((config.MIC_RATE/config.CHUNK)*config.RECORD_TIME):
+            for j in range(len(self.streams)):
+                self.frames[j].append(self.streams[j].read(config.CHUNK))
     """
     Creates wav files
     """
@@ -61,7 +61,7 @@ class MicrophoneInterface:
             wavefile.setframerate(config.MIC_RATE)
             wavefile.writeframes(b''.join(self.frames[i]))
             wavefile.close()
-        self.frames = []
+        self.frames = {}
 
 def main():
     m = MicrophoneInterface()
