@@ -1,4 +1,4 @@
-import os, requests, analysis as an
+import os, requests, module as an
 from flask import *
 from functions import *
 
@@ -19,6 +19,11 @@ class Data:
 		self.avgvol = avgvol
 		self.time = time
 
+class Module:
+	def __init__(self, x = 0, y = 0):
+		self.x = x
+		self.y = y
+
 ###############################################################################
 # CONSTANTS
 ###############################################################################
@@ -26,10 +31,12 @@ UPLOAD_FOLDER = 'uploads'
 x = 3 # size of grid: width
 y = 3 # size of grid: height
 grid = []
+modules = [] # list of Module objects (contains locations of modules)
 tdelta = 3.0 # refresh delay
 FILE_NAME = ''
 nSamples = 5
 zoom = an.zoom
+module = an.Module
 
 # App initialization
 app = Flask(__name__)
@@ -46,14 +53,14 @@ def refresh(f, delay):
 # Update sample data datetime.now().strftime('%I:%M:%S%p')
 def update():
 	global grid, nSamples, zoom
-	an.read_files()
-	an.process_files()
+	module.read_files()
+	module.process_files()
 
-	smooth1 = an.chonk_avg(an.channel1, zoom)
-	smooth2 = an.chonk_avg(an.channel2, zoom)
-	smooth3 = an.chonk_avg(an.channel3, zoom)
+	smooth1 = module.chonk_avg(module.channel1, zoom)
+	smooth2 = module.chonk_avg(module.channel2, zoom)
+	smooth3 = module.chonk_avg(module.channel3, zoom)
 	drawPlot(smooth1, 1)
-	grid = an.convertToVolumeList(an.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
+	grid = module.convertToVolumeList(module.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
 	convert(grid)
 	nSamples = len(grid)
 	# nSamples = round(random() * 8 + 1)
