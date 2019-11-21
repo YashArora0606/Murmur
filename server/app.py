@@ -5,11 +5,19 @@ from functions import *
 ###############################################################################
 # OBJECTS
 ###############################################################################
-# Sound sample
+# Sound sample (for relative position to one module)
 class Sound:
 	def __init__(self, vol = 0, direc = 0, time = 0):
 		self.vol = vol
 		self.dir = direc
+		self.time = time
+
+# Sound sources
+class Source:
+	def __init__(self, vol = 0, x = 0, y = 0, time = 0):
+		self.vol = vol
+		self.x = x
+		self.y = y
 		self.time = time
 
 # Data transfer to website
@@ -19,6 +27,7 @@ class Data:
 		self.avgvol = avgvol
 		self.time = time
 
+# Module
 class Module:
 	def __init__(self, x = 0, y = 0):
 		self.x = x
@@ -70,16 +79,16 @@ def update():
 	# refresh(update, tdelta)
 
 # Print info to console
-def printGrid():
+def print_grid():
 	global tdelta, x, y, grid
-	points = list(map(exact, grid))
+	points = list(map(relative_location, grid))
 	for data in points:
 		print('-------------------------------')
 		print('Volume: ' + str(data.vol) + ', Direction: ' + str(data.dir) + ', Time: ' + str(data.time))
 		print('-------------------------------')
 
 # Put relevant data in Data object to send to front-end
-def genData(points):
+def generate_data(points):
 	global nSamples
 	average = round(sum([point.vol for point in points]) / nSamples, 2)
 	return Data(nSamples, average, points[0].time)
@@ -100,13 +109,13 @@ def upload():
 def index():
 	global grid, tdelta, nSamples
 	update()
-	# printGrid()
-	points = list(map(exact, grid))
+	# print_grid()
+	points = list(map(relative_location, grid))
 	for display in points:
 		display.vol = round(display.vol, 2)
 		display.dir = round(display.dir, 2)
-	address = gen_radar(points)
-	data = genData(points)
+	address = generate_radar(points)
+	data = generate_data(points)
 	return render_template('index.html', data=data, address=address, tdelta=tdelta)
 
 # Test POST Requests
