@@ -47,7 +47,7 @@ class MicrophoneInterface:
     def read_streams(self):
         for i in range((config.MIC_RATE/config.CHUNK)*config.RECORD_TIME):
             for j in range(len(self.streams)):
-                self.frames[j].append(self.streams[j].read(config.CHUNK))
+                self.frames[j].append(self.streams[j].read(config.CHUNK, exception_on_overflow=False))
     """
     Creates wav files
     """
@@ -68,7 +68,7 @@ def main():
     print("start script")
     m.print_devices()
     m.start_streams()
-    m.read_stream()
+    m.read_streams()
     m.write_wav()
     m.close_streams()
     print("done")
