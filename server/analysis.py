@@ -6,6 +6,7 @@ from math import ceil
 import os
 import re
 import matplotlib.pyplot as plt
+import noisereduce as nr
 
 # PATH = os.cwd()
 # OUTPUT_DIR = "/pi/output/"
@@ -41,6 +42,16 @@ def read_files(clear_after_read = False):
                     os.remove(os.path.join(UPLOADS_PATH, file_name))
             elif (file_info[1] == '2'):
                 sample_rate, channel3 = read(os.path.join(UPLOADS_PATH, file_name)) # assuming sample rates are the same
+                if (clear_after_read):
+                    os.remove(os.path.join(UPLOADS_PATH, file_name))
+
+NOISE_PATH = os.path.join(os.getcwd(), "noise")
+
+def read_noise(clear_after_read = False):
+    global noisefile
+    for file_name in file_list:
+        if re.match(r".*\.wav", file_name):
+                sample_rate, noisefile = read(os.path.join(UPLOADS_PATH, file_name))
                 if (clear_after_read):
                     os.remove(os.path.join(UPLOADS_PATH, file_name))
 
