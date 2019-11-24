@@ -27,8 +27,8 @@ class Data:
 		self.avgvol = avgvol
 		self.time = time
 
-# Module
-class Module:
+# Module Location (coordinates)
+class Module_Location:
 	def __init__(self, x = 0, y = 0):
 		self.x = x
 		self.y = y
@@ -40,7 +40,8 @@ UPLOAD_FOLDER = 'uploads'
 x = 3 # size of grid: width
 y = 3 # size of grid: height
 grid = []
-modules = [] # list of Module objects (contains locations of modules)
+module_locations = [] # list of Module_Location objects (contains locations of modules)
+times = [] # list of times of files in folder
 tdelta = 3.0 # refresh delay
 FILE_NAME = ''
 nSamples = 5
@@ -61,10 +62,11 @@ def refresh(f, delay):
 
 # Update sample data datetime.now().strftime('%I:%M:%S%p')
 def update():
-	global grid, nSamples, zoom
+	global grid, nSamples, zoom, times
 	module.read_files()
 	module.process_files()
 
+	# Initialize channels
 	smooth1 = module.chonk_avg(module.channel1, zoom)
 	smooth2 = module.chonk_avg(module.channel2, zoom)
 	smooth3 = module.chonk_avg(module.channel3, zoom)
@@ -72,6 +74,13 @@ def update():
 	grid = module.convertToVolumeList(module.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
 	convert(grid)
 	nSamples = len(grid)
+
+	# Initialize times
+	for file in os.listdir(UPLOAD_FOLDER):
+		currTime = file.split()[2]
+		if currTime not in times:
+			times.append(currTime)
+
 	# nSamples = round(random() * 8 + 1)
 	# grid = []
 	# for i in range(nSamples):

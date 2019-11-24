@@ -39,6 +39,7 @@ class Module:
                         os.path.join(UPLOADS_PATH, file_name))
                     if (clear_after_read):
                         os.remove(os.path.join(UPLOADS_PATH, file_name))
+                        lists.remove(file_info[2])
 
     def process_files(self):
         for channel in channels:
