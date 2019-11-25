@@ -41,9 +41,9 @@ def update():
 	an.read_files()
 	an.process_files()
 
-	smooth1 = an.chonk_avg(an.channel1, zoom)
-	smooth2 = an.chonk_avg(an.channel2, zoom)
-	smooth3 = an.chonk_avg(an.channel3, zoom)
+	smooth1 = an.denoise_and_smooth(an.channel1, zoom)
+	smooth2 = an.denoise_and_smooth(an.channel2, zoom)
+	smooth3 = an.denoise_and_smooth(an.channel3, zoom)
 	drawPlot(smooth1, 1)
 	grid = an.convertToVolumeList(an.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
 	convert(grid)

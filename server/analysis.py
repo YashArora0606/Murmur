@@ -46,14 +46,23 @@ def read_files(clear_after_read = False):
                     os.remove(os.path.join(UPLOADS_PATH, file_name))
 
 NOISE_PATH = os.path.join(os.getcwd(), "noise")
-
 def read_noise(clear_after_read = False):
     global noisefile
-    for file_name in file_list:
+    for file_name in os.listdir(NOISE_PATH):
         if re.match(r".*\.wav", file_name):
-                sample_rate, noisefile = read(os.path.join(UPLOADS_PATH, file_name))
+                sample_rate, noisefile = read(os.path.join(NOISE_PATH, file_name))
                 if (clear_after_read):
                     os.remove(os.path.join(UPLOADS_PATH, file_name))
+
+def process_noise():
+    global noisefile, frame_total
+    try:
+        noisefile = abs(noisefile[:,0]/2) + abs(noisefile[:,1]/2)
+    except:
+        noisefile = abs(noisefile[:])
+    noisefile = noisefile[::len(noisefile)//(frame_total-1)]
+    
+
 
 def process_files():
     global channel1, channel2, channel3, frame_total
@@ -79,9 +88,11 @@ def smooth(x, window_len = 15):
     return y
 
 #Smoothing function that is currently in use
-def chonk_avg(arr, chunk_size):
+def denoise_and_smooth(arr, chunk_sizem):
     #Produces a new array of the average value in each chunk of  chunk_size
     #New array contains (len(arr)//chunk_size) chunks
+    
+    
     chonks = []
     newLen = frame_total//chunk_size
     for i in range(newLen + 1):
@@ -306,7 +317,7 @@ def convertToVolumeList(event_list, c1, c2, c3):
 #Create plot of original sound file
 #g = drawPlot(channel1, 0)
 
-#smoothChannel = chonk_avg(channel1, 20)
+#smoothChannel = denoise_and_smooth(channel1, 20)
 #threshold = find_event_thresh(smoothChannel)
 
 #f = Plot of smoothed sound file
@@ -323,18 +334,22 @@ def convertToVolumeList(event_list, c1, c2, c3):
 
 def main():
     read_files()
+    read_noise()
     process_files()
 
-    smooth1 = chonk_avg(channel1, zoom)
-    smooth2 = chonk_avg(channel2, zoom)
-    smooth3 = chonk_avg(channel3, zoom)
+    smooth1 = denoise_and_smooth(channel1, zoom)
+    smooth2 = denoise_and_smooth(channel2, zoom)
+    smooth3 = denoise_and_smooth(channel3, zoom)
 
-    drawPlot(smooth1, 1)
-    plt.axhline(y=find_event_thresh(smooth1), color='r', linestyle='-')
-    plt.xticks(range(0, len(smooth1), 1))
+    drawPlot(noisefile, 1)
 
-    drawPlot(smooth2, 2)
-    drawPlot(smooth3, 3)
+
+    # drawPlot(smooth1, 1)
+    # plt.axhline(y=find_event_thresh(smooth1), color='r', linestyle='-')
+    # plt.xticks(range(0, len(smooth1), 1))
+
+    # drawPlot(smooth2, 2)
+    # drawPlot(smooth3, 3)
 
     # print(find_module_events(smooth1, smooth2, smooth3))
     # volumes_list = convertToVolumeList(find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
