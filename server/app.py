@@ -35,8 +35,8 @@ modules = [] # list of Module objects (contains locations of modules)
 tdelta = 3.0 # refresh delay
 FILE_NAME = ''
 nSamples = 5
-zoom = an.zoom
 module = an.Module
+zoom = 50
 
 # App initialization
 app = Flask(__name__)
@@ -61,7 +61,7 @@ def update():
 	smooth3 = module.chonk_avg(module.channel3, zoom)
 	drawPlot(smooth1, 1)
 	grid = module.convertToVolumeList(module.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
-	convert(grid)
+	# convert(grid)
 	nSamples = len(grid)
 	# nSamples = round(random() * 8 + 1)
 	# grid = []
@@ -119,6 +119,7 @@ def listen():
 		f.save(os.path.join('uploads2', f.filename))
 		FILE_NAME = f.filename
 		print('File name: ' + FILE_NAME)
+		# print('IP Address:' + )
 	return redirect('/')
 
 if __name__ == '__main__':
