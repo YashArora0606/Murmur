@@ -46,7 +46,6 @@ def read_files(clear_after_read = False):
                     os.remove(os.path.join(UPLOADS_PATH, file_name))
 
 NOISE_PATH = os.path.join(os.getcwd(), "noise")
-
 def read_noise(clear_after_read = False):
     global noisefile
     for file_name in os.listdir(NOISE_PATH):
@@ -54,6 +53,16 @@ def read_noise(clear_after_read = False):
                 sample_rate, noisefile = read(os.path.join(NOISE_PATH, file_name))
                 if (clear_after_read):
                     os.remove(os.path.join(UPLOADS_PATH, file_name))
+
+def process_noise():
+    global noisefile, frame_total
+    try:
+        noisefile = abs(noisefile[:,0]/2) + abs(noisefile[:,1]/2)
+    except:
+        noisefile = abs(noisefile[:])
+    noisefile = noisefile[::len(noisefile)//(frame_total-1)]
+    
+
 
 def process_files():
     global channel1, channel2, channel3, frame_total
@@ -79,9 +88,11 @@ def smooth(x, window_len = 15):
     return y
 
 #Smoothing function that is currently in use
-def denoise_and_smooth(arr, chunk_size):
+def denoise_and_smooth(arr, chunk_sizem):
     #Produces a new array of the average value in each chunk of  chunk_size
     #New array contains (len(arr)//chunk_size) chunks
+    
+    
     chonks = []
     newLen = frame_total//chunk_size
     for i in range(newLen + 1):

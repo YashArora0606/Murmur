@@ -3,10 +3,12 @@ import sys
 from scipy.io.wavfile import read
 from scipy.signal import argrelextrema
 from math import ceil
+import noisereduce as nr
 import os
 import re
 
 UPLOADS_PATH = os.path.join(os.getcwd(), "uploads")
+NOISE_PATH = os.path.join(os.getcwd(), "noise")
 np.set_printoptions(threshold=sys.maxsize)
 
 
@@ -18,6 +20,7 @@ class Module:
         self.channel1 = []
         self.channel2 = []
         self.channel3 = []
+        self.noisefile = []
         self.frame_total = 1000
         self.chunk_size = 1
         self.num_sounds = 0
@@ -50,6 +53,21 @@ class Module:
             # Reduces number of samples
             channel = channel[::len(channel)//(frame_total-1)]
 
+    def read_noise(self, clear_after_read = False):
+        for file_name in os.listdir(NOISE_PATH):
+            if re.match(r".*\.wav", file_name):
+                    sample_rate, self.noisefile = read(os.path.join(NOISE_PATH, file_name))
+                    if (clear_after_read):
+                        os.remove(os.path.join(UPLOADS_PATH, file_name))
+
+    def process_noise(self):
+        try:
+            self.noisefile = abs(self.noisefile[:,0]/2) + abs(self.noisefile[:,1]/2)
+        except:
+            self.noisefile = abs(self.noisefile[:])
+        self.noisefile = self.noisefile[::len(self.noisefile)//(frame_total-1)]
+
+
     def find_module_events(self):
         module_threshold = (self._find_event_threshold(self.channels[0]) + self._find_event_threshold(
             self.channels[1]) + self._find_event_threshold(self.channels[2]))/3
@@ -61,12 +79,14 @@ class Module:
         self.module_events = self._merge_events(
             self._merge_events(events[0], events[1]), events[2])
 
-    def _smooth(self, channel, chunk_size):
+    def _smooth(self, channel, chunk_size, noise_array):
+        reduced_noise = nr.reduce_noise(audio_clip = channel, noise_clip=noise_array, verbose=True)
         new_channel = []
+
         new_len = frame_total//chunk_size
         for i in range(new_len + 1):
             total = 0
-            for val in channel[i*chunk_size: i*chunk_size + chunk_size]:
+            for val in reduced_noise[i*chunk_size: i*chunk_size + chunk_size]:
                 total += val
             total /= chunk_size
             new_channel.append(total)
