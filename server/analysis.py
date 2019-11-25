@@ -49,9 +49,9 @@ NOISE_PATH = os.path.join(os.getcwd(), "noise")
 
 def read_noise(clear_after_read = False):
     global noisefile
-    for file_name in file_list:
+    for file_name in os.listdir(NOISE_PATH):
         if re.match(r".*\.wav", file_name):
-                sample_rate, noisefile = read(os.path.join(UPLOADS_PATH, file_name))
+                sample_rate, noisefile = read(os.path.join(NOISE_PATH, file_name))
                 if (clear_after_read):
                     os.remove(os.path.join(UPLOADS_PATH, file_name))
 
@@ -323,18 +323,22 @@ def convertToVolumeList(event_list, c1, c2, c3):
 
 def main():
     read_files()
+    read_noise()
     process_files()
 
     smooth1 = chonk_avg(channel1, zoom)
     smooth2 = chonk_avg(channel2, zoom)
     smooth3 = chonk_avg(channel3, zoom)
 
-    drawPlot(smooth1, 1)
-    plt.axhline(y=find_event_thresh(smooth1), color='r', linestyle='-')
-    plt.xticks(range(0, len(smooth1), 1))
+    drawPlot(noisefile, 1)
 
-    drawPlot(smooth2, 2)
-    drawPlot(smooth3, 3)
+
+    # drawPlot(smooth1, 1)
+    # plt.axhline(y=find_event_thresh(smooth1), color='r', linestyle='-')
+    # plt.xticks(range(0, len(smooth1), 1))
+
+    # drawPlot(smooth2, 2)
+    # drawPlot(smooth3, 3)
 
     # print(find_module_events(smooth1, smooth2, smooth3))
     # volumes_list = convertToVolumeList(find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
