@@ -42,16 +42,16 @@ class Module:
                         os.path.join(UPLOADS_PATH, file_name))
                     if (clear_after_read):
                         os.remove(os.path.join(UPLOADS_PATH, file_name))
-                        lists.remove(file_info[2])
+                        os.remove(file_info[2])
 
     def process_files(self):
-        for channel in channels:
+        for channel in self.channels:
             try:  # Converts stereo to mono audio
                 channel = abs(channel[:, 0]/2) + abs(channel[:, 1]/2)
             except:
                 channel = abs(channel[:])
             # Reduces number of samples
-            channel = channel[::len(channel)//(frame_total-1)]
+            channel = channel[::len(channel)//(self.frame_total-1)]
 
     def read_noise(self, clear_after_read = False):
         for file_name in os.listdir(NOISE_PATH):
@@ -65,15 +65,15 @@ class Module:
             self.noisefile = abs(self.noisefile[:,0]/2) + abs(self.noisefile[:,1]/2)
         except:
             self.noisefile = abs(self.noisefile[:])
-        self.noisefile = self.noisefile[::len(self.noisefile)//(frame_total-1)]
+        self.noisefile = self.noisefile[::len(self.noisefile)//(self.frame_total-1)]
 
 
     def find_module_events(self):
-        module_threshold = (self._find_event_threshold(self.channels[0]) + self._find_event_threshold(
-            self.channels[1]) + self._find_event_threshold(self.channels[2]))/3
+        module_threshold = (self._find_event_thresh(self.channels[0]) + self._find_event_thresh(
+            self.channels[1]) + self._find_event_thresh(self.channels[2]))/3
 
         events = [self._find_mic_events(
-            channel, module_threshold) for channel in channels]
+            channel, module_threshold) for channel in self.channels]
 
         # TODO: make one function to merge events
         self.module_events = self._merge_events(
@@ -83,7 +83,7 @@ class Module:
         reduced_noise = nr.reduce_noise(audio_clip = channel, noise_clip=noise_array, verbose=True)
         new_channel = []
 
-        new_len = frame_total//chunk_size
+        new_len = self.frame_total//chunk_size
         for i in range(new_len + 1):
             total = 0
             for val in reduced_noise[i*chunk_size: i*chunk_size + chunk_size]:
@@ -167,7 +167,7 @@ class Module:
         # print("event_start, event_end: ", event_start, event_end)
         # print("e_list passed:", e_list)
         for k in e_list:
-            if (self.overlap(event_start, event_end, k[0], k[1]) and k[2] == False):
+            if (self._overlap(event_start, event_end, k[0], k[1]) and k[2] == False):
                 # print("First check")
                 # Check if it shares more than 65% of the shorter one
                 min_shared = ceil(
