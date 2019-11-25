@@ -5,11 +5,19 @@ from functions import *
 ###############################################################################
 # OBJECTS
 ###############################################################################
-# Sound sample
+# Sound sample (for relative position to one module)
 class Sound:
 	def __init__(self, vol = 0, direc = 0, time = 0):
 		self.vol = vol
 		self.dir = direc
+		self.time = time
+
+# Sound sources
+class Source:
+	def __init__(self, vol = 0, x = 0, y = 0, time = 0):
+		self.vol = vol
+		self.x = x
+		self.y = y
 		self.time = time
 
 # Data transfer to website
@@ -19,7 +27,8 @@ class Data:
 		self.avgvol = avgvol
 		self.time = time
 
-class Module:
+# Module Location (coordinates)
+class Module_Location:
 	def __init__(self, x = 0, y = 0):
 		self.x = x
 		self.y = y
@@ -31,7 +40,8 @@ UPLOAD_FOLDER = 'uploads'
 x = 3 # size of grid: width
 y = 3 # size of grid: height
 grid = []
-modules = [] # list of Module objects (contains locations of modules)
+module_locations = [] # list of Module_Location objects (contains locations of modules)
+times = [] # list of times of files in folder
 tdelta = 3.0 # refresh delay
 FILE_NAME = ''
 nSamples = 5
@@ -52,10 +62,11 @@ def refresh(f, delay):
 
 # Update sample data datetime.now().strftime('%I:%M:%S%p')
 def update():
-	global grid, nSamples, zoom
+	global grid, nSamples, zoom, times
 	module.read_files()
 	module.process_files()
 
+	# Initialize channels
 	smooth1 = module.chonk_avg(module.channel1, zoom)
 	smooth2 = module.chonk_avg(module.channel2, zoom)
 	smooth3 = module.chonk_avg(module.channel3, zoom)
@@ -63,6 +74,13 @@ def update():
 	grid = module.convertToVolumeList(module.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
 	convert(grid)
 	nSamples = len(grid)
+
+	# Initialize times
+	for file in os.listdir(UPLOAD_FOLDER):
+		currTime = file.split()[2]
+		if currTime not in times:
+			times.append(currTime)
+
 	# nSamples = round(random() * 8 + 1)
 	# grid = []
 	# for i in range(nSamples):
@@ -70,16 +88,16 @@ def update():
 	# refresh(update, tdelta)
 
 # Print info to console
-def printGrid():
+def print_grid():
 	global tdelta, x, y, grid
-	points = list(map(exact, grid))
+	points = list(map(relative_location, grid))
 	for data in points:
 		print('-------------------------------')
 		print('Volume: ' + str(data.vol) + ', Direction: ' + str(data.dir) + ', Time: ' + str(data.time))
 		print('-------------------------------')
 
 # Put relevant data in Data object to send to front-end
-def genData(points):
+def generate_data(points):
 	global nSamples
 	average = round(sum([point.vol for point in points]) / nSamples, 2)
 	return Data(nSamples, average, points[0].time)
@@ -100,13 +118,13 @@ def upload():
 def index():
 	global grid, tdelta, nSamples
 	update()
-	# printGrid()
-	points = list(map(exact, grid))
+	# print_grid()
+	points = list(map(relative_location, grid))
 	for display in points:
 		display.vol = round(display.vol, 2)
 		display.dir = round(display.dir, 2)
-	address = gen_radar(points)
-	data = genData(points)
+	address = generate_radar(points)
+	data = generate_data(points)
 	return render_template('index.html', data=data, address=address, tdelta=tdelta)
 
 # Test POST Requests
