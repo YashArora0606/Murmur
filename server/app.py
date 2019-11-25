@@ -67,9 +67,9 @@ def update():
 	module.process_files()
 
 	# Initialize channels
-	smooth1 = module.chonk_avg(module.channel1, zoom)
-	smooth2 = module.chonk_avg(module.channel2, zoom)
-	smooth3 = module.chonk_avg(module.channel3, zoom)
+	smooth1 = module.denoise_and_smooth(module.channel1, zoom)
+	smooth2 = module.denoise_and_smooth(module.channel2, zoom)
+	smooth3 = module.denoise_and_smooth(module.channel3, zoom)
 	drawPlot(smooth1, 1)
 	grid = module.convertToVolumeList(module.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
 	convert(grid)

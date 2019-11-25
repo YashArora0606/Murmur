@@ -79,7 +79,7 @@ def smooth(x, window_len = 15):
     return y
 
 #Smoothing function that is currently in use
-def chonk_avg(arr, chunk_size):
+def denoise_and_smooth(arr, chunk_size):
     #Produces a new array of the average value in each chunk of  chunk_size
     #New array contains (len(arr)//chunk_size) chunks
     chonks = []
@@ -306,7 +306,7 @@ def convertToVolumeList(event_list, c1, c2, c3):
 #Create plot of original sound file
 #g = drawPlot(channel1, 0)
 
-#smoothChannel = chonk_avg(channel1, 20)
+#smoothChannel = denoise_and_smooth(channel1, 20)
 #threshold = find_event_thresh(smoothChannel)
 
 #f = Plot of smoothed sound file
@@ -326,9 +326,9 @@ def main():
     read_noise()
     process_files()
 
-    smooth1 = chonk_avg(channel1, zoom)
-    smooth2 = chonk_avg(channel2, zoom)
-    smooth3 = chonk_avg(channel3, zoom)
+    smooth1 = denoise_and_smooth(channel1, zoom)
+    smooth2 = denoise_and_smooth(channel2, zoom)
+    smooth3 = denoise_and_smooth(channel3, zoom)
 
     drawPlot(noisefile, 1)
 
