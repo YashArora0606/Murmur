@@ -16,7 +16,7 @@ def record_and_send():
     print("Uploading...")
     network.upload_all(clear_after_upload = True)
 
-schedule.every.minute.at(":00").do(record_and_send)
+schedule.every().minute.at(":00").do(record_and_send)
 
 while True:
     schedule.run_pending()

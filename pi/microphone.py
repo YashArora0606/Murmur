@@ -13,7 +13,7 @@ class MicrophoneInterface:
         self.devices = [self.p.get_device_info_by_index(i) for i in range(self.device_count)]
         self.streams = []
         self.frames = {}
-        self.time = time.now()
+        self.time = ""
     """
     DEBUG: Shows devices that are recognized currently
     """
