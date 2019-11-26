@@ -12,9 +12,10 @@ class MicrophoneInterface:
         self.device_count = self.p.get_device_count()
         self.devices = [self.p.get_device_info_by_index(i) for i in range(self.device_count)]
         self.streams = []
-        self.frames = []
+        self.frames = {}
+        self.time = ""
     """
-    Shows devices that are recognized currently
+    DEBUG: Shows devices that are recognized currently
     """
     def print_devices(self):
         for device in self.devices:
@@ -23,7 +24,8 @@ class MicrophoneInterface:
     """
     Starts recording on all audio devices
     """
-    def start_streams(self):
+    def start_streams(self,time):
+        self.time = time
         for i in range(len(config.DEV_INDEXES)):
             self.streams.append(
                     self.p.open(
@@ -34,20 +36,22 @@ class MicrophoneInterface:
                     input = True,
                     frames_per_buffer=config.CHUNK)
                 )
-
+            self.frames[i] = []
+    """
+    Stops all streams
+    """
     def close_streams(self):
         for stream in self.streams:
             stream.stop_stream()
             stream.close()
-	self.streams = []
+	    self.streams = []
     """
     Reads data in stream
     """
-    def read_stream(self):
-        for i in range(len(self.streams)):
-            self.frames.append([])
-            for j in range((config.MIC_RATE/config.CHUNK)*config.RECORD_TIME):
-                self.frames[i].append(self.streams[i].read(config.CHUNK))
+    def read_streams(self):
+        for i in range((config.MIC_RATE/config.CHUNK)*config.RECORD_TIME):
+            for j in range(len(self.streams)):
+                self.frames[j].append(self.streams[j].read(config.CHUNK, exception_on_overflow=False))
     """
     Creates wav files
     """
@@ -55,20 +59,21 @@ class MicrophoneInterface:
 	current_time = time.strftime("%I%M%S", time.localtime())
         for i in range(len(self.frames)):
 	    print(i)
-            wavefile = wave.open("./output/" + str(config.MODULE_ID) + "-" + str(i) + "-" + current_time + ".wav",'wb')
+            #wavefile = wave.open("./output/" + str(config.MODULE_ID) + "-" + str(i) + "-" + current_time + ".wav",'wb')
+            wavefile = wave.open("./output/" + str(config.MODULE_ID) + "-" + str(i) + "-" + self.time + ".wav",'wb')
             wavefile.setnchannels(config.CHANNELS)
             wavefile.setsampwidth(self.p.get_sample_size(pyaudio.paInt16))
             wavefile.setframerate(config.MIC_RATE)
             wavefile.writeframes(b''.join(self.frames[i]))
             wavefile.close()
-        self.frames = []
+        self.frames = {}
 
 def main():
     m = MicrophoneInterface()
     print("start script")
     m.print_devices()
-    m.start_streams()
-    m.read_stream()
+    m.start_streams(time.strftime("%I%M%S", time.localtime()))
+    m.read_streams()
     m.write_wav()
     m.close_streams()
     print("done")
