@@ -22,9 +22,6 @@ class Module:
         self.timeStamp = timeStamp
         self.moduleID = moduleID
         self.channels = [[], [], []]
-        self.channel1 = []
-        self.channel2 = []
-        self.channel3 = []
         self.noisefile = []
         self.frame_total = 1000
         self.chunk_size = 1
@@ -34,6 +31,9 @@ class Module:
 
         self.read_files(self.timeStamp)
         self.process_files()
+
+        for channel in self.channels:
+            channel = self._smooth(channel, self.chunk_size, self.noisefile)
 
     def read_files(self, timeStamp, clear_after_read=False):
         file_list = os.listdir(UPLOADS_PATH)
@@ -48,15 +48,20 @@ class Module:
                     if (clear_after_read):
                         os.remove(os.path.join(UPLOADS_PATH, file_name))
                         os.remove(file_info[2])
-
+    
     def process_files(self):
-        for channel in self.channels:
+        print(len(self.channels))
+        for i, channel in enumerate(self.channels):
             try:  # Converts stereo to mono audio
-                channel = abs(channel[:, 0]/2) + abs(channel[:, 1]/2)
+                channel = np.abs(channel[:, 0]/2) + np.abs(channel[:, 1]/2)
             except:
-                channel = abs(channel[:])
+                channel = np.abs(channel[:])
             # Reduces number of samples
-            channel = channel[::len(channel)//(self.frame_total-1)]
+            print(i, len(channel))
+            try:
+                channel = channel[::len(channel)//(self.frame_total-1)]
+            except:
+                pass
 
     def read_noise(self, clear_after_read = False):
         for file_name in os.listdir(NOISE_PATH):

@@ -1,4 +1,7 @@
-import os, requests, module as an, re
+import os
+import requests
+import module
+import re
 from flask import *
 from functions import *
 
@@ -45,7 +48,6 @@ times = [] # list of times of files in folder
 tdelta = 3.0 # refresh delay
 FILE_NAME = ''
 nSamples = 5
-module = an.Module
 zoom = 50
 modules = {} 
 
@@ -72,14 +74,16 @@ def update():
 				times.append(currTime)
 
 	for time in times:
-		modules[time] = module.get_modules(time)
-	# Initialize channels
-	# smooth1 = module._smooth(module.channel1, zoom)
-	# smooth2 = module._smooth(module.channel2, zoom)
-	# smooth3 = module._smooth(module.channel3, zoom)
-	# drawPlot(smooth1, 1)
-	grid = module.convertToVolumeList(module.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
+		modules[time] = module.get_modules(time) # list of Modules
+	
+	print(modules)
+	
+	mostRecent = modules[max(modules.keys())]
+	grid = Module.convertToVolumeList(Module.find_module_events(mostRecent[0], mostRecent[1], mostRecent[2]), mostRecent[0], mostRecent[1], mostRecent[2])
+
+	# grid = Module.convertToVolumeList(Module.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
 	# convert(grid)
+
 	nSamples = len(grid)
 
 	
