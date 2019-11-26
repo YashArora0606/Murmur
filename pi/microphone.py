@@ -72,7 +72,7 @@ def main():
     m = MicrophoneInterface()
     print("start script")
     m.print_devices()
-    m.start_streams()
+    m.start_streams(time.strftime("%I%M%S", time.localtime()))
     m.read_streams()
     m.write_wav()
     m.close_streams()
