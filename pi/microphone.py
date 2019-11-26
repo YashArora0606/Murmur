@@ -13,8 +13,9 @@ class MicrophoneInterface:
         self.devices = [self.p.get_device_info_by_index(i) for i in range(self.device_count)]
         self.streams = []
         self.frames = {}
+        self.time = time.now()
     """
-    Shows devices that are recognized currently
+    DEBUG: Shows devices that are recognized currently
     """
     def print_devices(self):
         for device in self.devices:
@@ -23,7 +24,8 @@ class MicrophoneInterface:
     """
     Starts recording on all audio devices
     """
-    def start_streams(self):
+    def start_streams(self,time):
+        self.time = time
         for i in range(len(config.DEV_INDEXES)):
             self.streams.append(
                     self.p.open(
@@ -35,7 +37,9 @@ class MicrophoneInterface:
                     frames_per_buffer=config.CHUNK)
                 )
             self.frames[i] = []
-
+    """
+    Stops all streams
+    """
     def close_streams(self):
         for stream in self.streams:
             stream.stop_stream()
@@ -55,7 +59,8 @@ class MicrophoneInterface:
 	current_time = time.strftime("%I%M%S", time.localtime())
         for i in range(len(self.frames)):
 	    print(i)
-            wavefile = wave.open("./output/" + str(config.MODULE_ID) + "-" + str(i) + "-" + current_time + ".wav",'wb')
+            #wavefile = wave.open("./output/" + str(config.MODULE_ID) + "-" + str(i) + "-" + current_time + ".wav",'wb')
+            wavefile = wave.open("./output/" + str(config.MODULE_ID) + "-" + str(i) + "-" + self.time + ".wav",'wb')
             wavefile.setnchannels(config.CHANNELS)
             wavefile.setsampwidth(self.p.get_sample_size(pyaudio.paInt16))
             wavefile.setframerate(config.MIC_RATE)
