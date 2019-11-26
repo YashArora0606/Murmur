@@ -1,4 +1,4 @@
-import os, requests, module as an
+import os, requests, module as an, re
 from flask import *
 from functions import *
 
@@ -36,7 +36,7 @@ class Module_Location:
 ###############################################################################
 # CONSTANTS
 ###############################################################################
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
 x = 3 # size of grid: width
 y = 3 # size of grid: height
 grid = []
@@ -47,6 +47,7 @@ FILE_NAME = ''
 nSamples = 5
 module = an.Module
 zoom = 50
+modules = {} 
 
 # App initialization
 app = Flask(__name__)
@@ -62,30 +63,31 @@ def refresh(f, delay):
 
 # Update sample data datetime.now().strftime('%I:%M:%S%p')
 def update():
-	global grid, nSamples, zoom, times
-	module.read_files()
-	module.process_files()
+	global grid, nSamples, zoom, times, UPLOAD_FOLDER
+	# Initialize times
+	for file in os.listdir(UPLOAD_FOLDER):
+		if re.match(r".*\.wav", file):
+			currTime = file.split('-')[2]
+			if currTime not in times:
+				times.append(currTime)
 
+	for time in times:
+		modules[time] = module.get_modules(time)
 	# Initialize channels
-	smooth1 = module.denoise_and_smooth(module.channel1, zoom)
-	smooth2 = module.denoise_and_smooth(module.channel2, zoom)
-	smooth3 = module.denoise_and_smooth(module.channel3, zoom)
-	drawPlot(smooth1, 1)
+	# smooth1 = module._smooth(module.channel1, zoom)
+	# smooth2 = module._smooth(module.channel2, zoom)
+	# smooth3 = module._smooth(module.channel3, zoom)
+	# drawPlot(smooth1, 1)
 	grid = module.convertToVolumeList(module.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
 	# convert(grid)
 	nSamples = len(grid)
 
-	# Initialize times
-	for file in os.listdir(UPLOAD_FOLDER):
-		currTime = file.split()[2]
-		if currTime not in times:
-			times.append(currTime)
+	
+
+	# module.read_files(times)
+	# module.process_files()
 
 	# nSamples = round(random() * 8 + 1)
-	# grid = []
-	# for i in range(nSamples):
-	# 	grid.append(gen_random())
-	# refresh(update, tdelta)
 
 # Print info to console
 def print_grid():
@@ -134,10 +136,17 @@ def listen():
 	if request.method == 'POST':
 		print('RECEIVED')
 		f = request.files['file']
-		f.save(os.path.join('uploads2', f.filename))
+		f.save(os.path.join('uploads', f.filename))
 		FILE_NAME = f.filename
 		print('File name: ' + FILE_NAME)
-		# print('IP Address:' + )
+		# print('IP Address:' + request.text)
+	return redirect('/')
+
+@app.route('/test', methods = ['POST'])
+def test():
+	if request.method == 'POST':
+		print('RECEIVED TEST')
+		print(request.data)
 	return redirect('/')
 
 if __name__ == '__main__':

@@ -11,6 +11,11 @@ UPLOADS_PATH = os.path.join(os.getcwd(), "uploads")
 NOISE_PATH = os.path.join(os.getcwd(), "noise")
 np.set_printoptions(threshold=sys.maxsize)
 
+def get_modules(timeStamp):
+    modules = []
+    for i in range(2):
+        modules.append(Module(timeStamp, i))
+    return modules
 
 class Module:
     def __init__(self, timeStamp, moduleID):
@@ -27,7 +32,7 @@ class Module:
         self.zoom = 50
         self.module_events = []
 
-        self.read_files(timeStamp)
+        self.read_files(self.timeStamp)
         self.process_files()
 
     def read_files(self, timeStamp, clear_after_read=False):
@@ -37,7 +42,7 @@ class Module:
             if re.match(r".*\.wav", file_name):
                 file_info = file_name.split("-")
                 # print(file_info)
-                if file_info[2] == str(timeStamp):
+                if file_info[2] == str(timeStamp) and file_info[0] == str(self.moduleID):
                     sample_rate, self.channels[int(file_info[1])] = read(
                         os.path.join(UPLOADS_PATH, file_name))
                     if (clear_after_read):
