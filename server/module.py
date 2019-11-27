@@ -90,7 +90,7 @@ class Module:
             self._merge_events(events[0], events[1]), events[2])
 
     def _smooth(self, channel, chunk_size, noise_array):
-        reduced_noise = nr.reduce_noise(audio_clip = channel, noise_clip=noise_array, verbose=True)
+        reduced_noise = nr.reduce_noise(audio_clip = np.asarray(channel), noise_clip=noise_array, verbose=True)
         new_channel = []
 
         new_len = self.frame_total//chunk_size
@@ -101,76 +101,6 @@ class Module:
             total /= chunk_size
             new_channel.append(total)
         return new_channel
-
-
-    def _merge_events(self, events1, events2):
-        e1 = events1[:]
-        e2 = events2[:]
-
-        # Add a 3rd element to each event in the arrays to indicate whether or not the event has been considered
-        for i in range(len(e1)):
-            e1[i].append(False)
-        for i in range(len(e2)):
-            e2[i].append(False)
-
-        e_merge = []
-        # Merge two event lists (e1 and e2)
-        for i in range(len(e1)):
-            if (e1[i][2] == False):
-                # Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
-                if (_return_overlap(e1[i][0], e1[i][1], e2)[0] == False):
-                    # print("No conflict")
-                    # print("")
-                    e_merge.append(e1[i][0:2])
-                    e1[i][2] = True
-                # If there is an overlapping event
-                else:
-                    # Perform the merge, append the merged, and mark them both as true
-                    merged = []
-
-                    # Mark them both as true
-                    e1[i][2] = True
-
-                    # overlapped event:
-                    e_overlap = e2[_return_overlap(e1[i][0], e1[i][1], e2)[1]]
-                    # print("return_overlap is: ", return_overlap(e1[i][0], e1[i][1], e2))
-                    e2[_return_overlap(e1[i][0], e1[i][1], e2)[1]][2] = True
-                    # print("e_overlap is: ", e_overlap)
-
-                    # Add to the merged event list
-                    # print("\nNew merge")
-                    merged.append(min(e_overlap[0], e1[i][0]))
-                    # print("Min of: ", e_overlap[0], e1[i][0])
-                    merged.append(max(e_overlap[1], e1[i][1]))
-                    # print("Max of: ", e_overlap[1], e1[i][1])
-                    # print("Merged: ", merged)
-
-                    e_merge.append(merged)
-
-        for i in range(len(e2)):
-            if (e2[i][2] == False):
-                # Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
-                if (_return_overlap(e2[i][0], e2[i][1], e1)[0] == False):
-                    # print("No conflict")
-                    e_merge.append(e2[i][0:2])
-                    e2[i][2] = True
-                # If there is an overlapping event
-                else:
-                    # Perform the merge, append the merged, and mark them both as true
-                    merged = []
-
-                    # Mark them both as true
-                    e2[i][2] = True
-
-                    # overlapped event:
-                    e_overlap = e1[_return_overlap(e2[i][0], e2[i][1], e1)[1]]
-                    e1[_return_overlap(e2[i][0], e2[i][1], e1)[1]][2] = True
-
-                    # Add to the merged event list
-                    merged.append(min(e_overlap[0], e2[i][0]))
-                    merged.append(max(e_overlap[1], e2[i][1]))
-                    e_merge.append(merged)
-        return e_merge
 
     def _return_overlap(self, event_start, event_end, e_list):
         # print("return overlap")
@@ -188,6 +118,77 @@ class Module:
                     return True, e_list.index(k)
         # Didn't find any overlaps
         return False, 0
+
+    def _merge_events(self, events1, events2):
+        e1 = events1[:]
+        e2 = events2[:]
+
+        # Add a 3rd element to each event in the arrays to indicate whether or not the event has been considered
+        for i in range(len(e1)):
+            e1[i].append(False)
+        for i in range(len(e2)):
+            e2[i].append(False)
+
+        e_merge = []
+        # Merge two event lists (e1 and e2)
+        for i in range(len(e1)):
+            if (e1[i][2] == False):
+                # Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
+                if (self._return_overlap(e1[i][0], e1[i][1], e2)[0] == False):
+                    # print("No conflict")
+                    # print("")
+                    e_merge.append(e1[i][0:2])
+                    e1[i][2] = True
+                # If there is an overlapping event
+                else:
+                    # Perform the merge, append the merged, and mark them both as true
+                    merged = []
+
+                    # Mark them both as true
+                    e1[i][2] = True
+
+                    # overlapped event:
+                    e_overlap = e2[self._return_overlap(e1[i][0], e1[i][1], e2)[1]]
+                    # print("return_overlap is: ", return_overlap(e1[i][0], e1[i][1], e2))
+                    e2[self._return_overlap(e1[i][0], e1[i][1], e2)[1]][2] = True
+                    # print("e_overlap is: ", e_overlap)
+
+                    # Add to the merged event list
+                    # print("\nNew merge")
+                    merged.append(min(e_overlap[0], e1[i][0]))
+                    # print("Min of: ", e_overlap[0], e1[i][0])
+                    merged.append(max(e_overlap[1], e1[i][1]))
+                    # print("Max of: ", e_overlap[1], e1[i][1])
+                    # print("Merged: ", merged)
+
+                    e_merge.append(merged)
+
+        for i in range(len(e2)):
+            if (e2[i][2] == False):
+                # Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
+                if (self._return_overlap(e2[i][0], e2[i][1], e1)[0] == False):
+                    # print("No conflict")
+                    e_merge.append(e2[i][0:2])
+                    e2[i][2] = True
+                # If there is an overlapping event
+                else:
+                    # Perform the merge, append the merged, and mark them both as true
+                    merged = []
+
+                    # Mark them both as true
+                    e2[i][2] = True
+
+                    # overlapped event:
+                    e_overlap = e1[self._return_overlap(e2[i][0], e2[i][1], e1)[1]]
+                    e1[self._return_overlap(e2[i][0], e2[i][1], e1)[1]][2] = True
+
+                    # Add to the merged event list
+                    merged.append(min(e_overlap[0], e2[i][0]))
+                    merged.append(max(e_overlap[1], e2[i][1]))
+                    e_merge.append(merged)
+        return e_merge
+
+    
     #TODO: This should merged with the above function
     def _overlap(self, a_start, a_end, b_start, b_end):
         if (b_start < a_start and b_end < a_start):
@@ -269,6 +270,6 @@ class Module:
             start_id = event_list[i][0]
             end_id = event_list[i][1]
 
-            volumeList.append(determineVolumes(start_id, end_id, c1, c2, c3))
+            volumeList.append(self.determineVolumes(start_id, end_id, c1, c2, c3))
 
         return volumeList
