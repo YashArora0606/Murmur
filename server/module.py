@@ -14,7 +14,7 @@ np.set_printoptions(threshold=sys.maxsize)
 
 def get_modules(timeStamp):
     modules = []
-    for i in range(2):
+    for i in range(1):
         print("timeStamp", timeStamp)
         print("module", i)
         modules.append(Module(timeStamp, i))
@@ -34,7 +34,7 @@ class Module:
         self.moduleID = moduleID
         self.channels = [[], [], []]
         self.noisefile = []
-        self.frame_total = 1000
+        self.frame_total = 409600
         self.chunk_size = 100
         self.num_sounds = 0
         self.zoom = 20
@@ -42,14 +42,12 @@ class Module:
 
         self.read_files(self.timeStamp)
         self.process_files()
-        self.frame_total = len(self.channels[0])
-        print("past processing")
-        for channel in self.channels:
-            channel = self._smooth(channel, self.chunk_size, self.noisefile)
-        print("past smoothing")
+        print(len(self.channels[0]))
 
+        for i in range(len(self.channels)):
+            self.channels[i] = self._smooth(self.channels[i], self.chunk_size, self.noisefile)
+        print(self.channels)
         self.find_module_events()
-        print("past find module events")
     def read_files(self, timeStamp, clear_after_read=False):
         file_list = os.listdir(UPLOADS_PATH)
         for file_name in file_list:
@@ -66,17 +64,13 @@ class Module:
     
     def process_files(self):
         print(len(self.channels))
-        for i, channel in enumerate(self.channels):
+        for i in range(len(self.channels)):
             try:  # Converts stereo to mono audio
-                channel = np.abs(channel[:, 0]/2) + np.abs(channel[:, 1]/2)
+                self.channels[i] = np.abs(self.channels[i][:, 0]/2) + np.abs(self.channels[i][:, 1]/2)
             except:
-                channel = np.abs(channel[:])
+                self.channels[i] = np.abs(self.channels[i][:])
             # Reduces number of samples
-            print(i, len(channel))
-            try:
-                channel = channel[::len(channel)//(self.frame_total-1)]
-            except:
-                pass
+            
 
     def read_noise(self, clear_after_read = False):
         for file_name in os.listdir(NOISE_PATH):
@@ -249,8 +243,12 @@ class Module:
         for numLocalMax in np.nditer(maxima):
             sum_local_max += numpy_arr[numLocalMax]
 
+        avg_max = sum_local_max / len(maxima)
+        avg_min = sum_local_min / len(minima)
+        range_diff = avg_max - avg_min
+
         # Calculates threshold value
-        threshold_vol = (sum_local_min + sum_local_max) / (len(maxima) + len(minima))
+        threshold_vol = (sum_local_min + sum_local_max) / (len(maxima) + len(minima)) + range_diff/2
         # print(threshold_vol)
 
         return threshold_vol
@@ -271,7 +269,7 @@ class Module:
         #ADD FEATURE: Coallesce short events that are very close together
         return events
 
-    def determineVolumes(self,start_index, end_index, c1, c2, c3):
+    def determineVolumes(self, start_index, end_index):
         volumes = []
 
         v1 = 0
@@ -279,9 +277,9 @@ class Module:
         v3 = 0
 
         for i in range(start_index, end_index):
-            v1 += c1[i]
-            v2 += c2[i]
-            v3 += c3[i]
+            v1 += self.channels[0][i]
+            v2 += self.channels[1][i]
+            v3 += self.channels[2][i]
 
         v1 = v1/(end_index - start_index)
         v2 = v2/(end_index - start_index)
@@ -293,17 +291,17 @@ class Module:
 
         return volumes
 
-    def convertToVolumeList(self,event_list, c1, c2, c3):
+    def convertToVolumeList(self):
 
         volumeList = []
 
         start_id = 0
         end_id = 0
 
-        for i in range(len(event_list)):
-            start_id = event_list[i][0]
-            end_id = event_list[i][1]
+        for i in range(len(self.module_events)):
+            start_id = self.module_events[i][0]
+            end_id = self.module_events[i][1]
 
-            volumeList.append(self.determineVolumes(start_id, end_id, c1, c2, c3))
+            volumeList.append(self.determineVolumes(start_id, end_id))
 
         return volumeList

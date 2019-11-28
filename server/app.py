@@ -76,12 +76,10 @@ def update():
 
 	for time in times:
 		modules[time] = module.get_modules(time) # list of Modules
-	
-	print(modules)
-	
+		
 	mostRecent = modules[max(modules.keys())]
 	for mod in mostRecent:
-		grid.append(mod.convertToVolumeList(mod.module_events))
+		grid.append(mod.convertToVolumeList())
 
 	# grid = Module.convertToVolumeList(Module.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
 	# convert(grid)
@@ -128,11 +126,13 @@ def index():
 	update()
 	print("Past update")
 	# print_grid()
-	points = list(map(relative_location, grid))
+	for elem in grid:
+		points = list(map(relative_location, elem))
 	for display in points:
 		display.vol = round(display.vol, 2)
 		display.dir = round(display.dir, 2)
 	address = generate_radar(points)
+	# address2 = generate_map(points)
 	data = generate_data(points)
 	return render_template('index.html', data=data, address=address, tdelta=tdelta)
 
