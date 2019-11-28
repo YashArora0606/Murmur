@@ -107,6 +107,7 @@ class Module:
 
     def _smooth(self, channel, chunk_size, noisefile):
         # reduced_noise = nr.reduce_noise(audio_clip = channel, noise_clip=noise_array, verbose=True)
+
         new_channel = []
 
         new_len = self.frame_total//chunk_size
@@ -118,6 +119,22 @@ class Module:
             new_channel.append(total)
         return new_channel
 
+    def _return_overlap(self, event_start, event_end, e_list):
+        # print("return overlap")
+        # print("event_start, event_end: ", event_start, event_end)
+        # print("e_list passed:", e_list)
+        for k in e_list:
+            if (self._overlap(event_start, event_end, k[0], k[1]) and k[2] == False):
+                # print("First check")
+                # Check if it shares more than 65% of the shorter one
+                min_shared = ceil(
+                    0.65 * min(k[1] - k[0], event_end-event_start))
+                if (min(k[1], event_end) - max(k[0], event_start) >= min_shared):
+                    # Return true and the index of k in e_list
+                    #print("return_overlap[1] is: ", e_list.index(k))
+                    return True, e_list.index(k)
+        # Didn't find any overlaps
+        return False, 0
 
     def _merge_events(self, events1, events2):
         e1 = events1[:]
@@ -205,6 +222,7 @@ class Module:
                     return (True, e_list.index(k))
         # Didn't find any overlaps
         return (False, 0)
+
     #TODO: This should merged with the above function
     def _overlap(self, a_start, a_end, b_start, b_end):
         if (b_start < a_start and b_end < a_start):
@@ -286,6 +304,6 @@ class Module:
             start_id = event_list[i][0]
             end_id = event_list[i][1]
 
-            volumeList.append(determineVolumes(start_id, end_id, c1, c2, c3))
+            volumeList.append(self.determineVolumes(start_id, end_id, c1, c2, c3))
 
         return volumeList
