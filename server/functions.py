@@ -17,6 +17,7 @@ def relative_location(v): # takes in a list v of 3 volumes (from 0 = top, CW); t
 	v1 = v[1]
 	v2 = v[2]
 	v3 = v[0]
+	print (v1, v2, v3)
 	vec = [v1 * sqrt(3)/2 - v2 * sqrt(3)/2, -v1/2 - v2/2 + v3]
 	angle = 450 - degrees(atan2(vec[1], vec[0]))
 	angle %= 360

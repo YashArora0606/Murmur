@@ -356,6 +356,7 @@ def main():
     # print(volumes_list)
 
     plt.show()
+    
 
     find_module_events(smooth1 ,smooth2, smooth3)
 

@@ -1,3 +1,4 @@
+
 import numpy as np
 import sys
 from scipy.io.wavfile import read
@@ -13,9 +14,19 @@ np.set_printoptions(threshold=sys.maxsize)
 
 def get_modules(timeStamp):
     modules = []
-    for i in range(2):
+    for i in range(1):
+        print("timeStamp", timeStamp)
+        print("module", i)
         modules.append(Module(timeStamp, i))
     return modules
+
+def drawPlot(channel, plotId):
+    plot = plt.figure(plotId)
+    plt.plot(range(len(channel)), channel)
+    plt.xlabel('Time')
+    plt.ylabel('Amplitude')
+    plt.savefig('./static/img/plot.png')
+    return plot
 
 class Module:
     def __init__(self, timeStamp, moduleID):
@@ -23,25 +34,27 @@ class Module:
         self.moduleID = moduleID
         self.channels = [[], [], []]
         self.noisefile = []
-        self.frame_total = 1000
-        self.chunk_size = 1
+        self.frame_total = 409600
+        self.chunk_size = 100
         self.num_sounds = 0
-        self.zoom = 50
+        self.zoom = 20
         self.module_events = []
 
         self.read_files(self.timeStamp)
         self.process_files()
+        print(len(self.channels[0]))
 
-        for channel in self.channels:
-            channel = self._smooth(channel, self.chunk_size, self.noisefile)
-
+        for i in range(len(self.channels)):
+            self.channels[i] = self._smooth(self.channels[i], self.chunk_size, self.noisefile)
+        print(self.channels)
+        self.find_module_events()
     def read_files(self, timeStamp, clear_after_read=False):
         file_list = os.listdir(UPLOADS_PATH)
         for file_name in file_list:
             # print(file_list)
             if re.match(r".*\.wav", file_name):
                 file_info = file_name.split("-")
-                # print(file_info)
+                print(file_info)
                 if file_info[2] == str(timeStamp) and file_info[0] == str(self.moduleID):
                     sample_rate, self.channels[int(file_info[1])] = read(
                         os.path.join(UPLOADS_PATH, file_name))
@@ -51,18 +64,13 @@ class Module:
     
     def process_files(self):
         print(len(self.channels))
-        for i, channel in enumerate(self.channels):
-            reduced_noise = nr.reduce_noise(audio_clip = channel, noise_clip= self.noisefile, verbose=True)
+        for i in range(len(self.channels)):
             try:  # Converts stereo to mono audio
-                channel = np.abs(reduced_noise[:, 0]/2) + np.abs(reduced_noise[:, 1]/2)
+                self.channels[i] = np.abs(self.channels[i][:, 0]/2) + np.abs(self.channels[i][:, 1]/2)
             except:
-                channel = np.abs(reduced_noise[:])
+                self.channels[i] = np.abs(self.channels[i][:])
             # Reduces number of samples
-            print(i, len(channel))
-            try:
-                channel = reduced_noise[::len(reduced_noise)//(self.frame_total-1)]
-            except:
-                pass
+            
 
     def read_noise(self, clear_after_read = False):
         for file_name in os.listdir(NOISE_PATH):
@@ -82,15 +90,18 @@ class Module:
     def find_module_events(self):
         module_threshold = (self._find_event_thresh(self.channels[0]) + self._find_event_thresh(
             self.channels[1]) + self._find_event_thresh(self.channels[2]))/3
-
+        print("past find threshholds")
         events = [self._find_mic_events(
             channel, module_threshold) for channel in self.channels]
-
+        print("past find mic events", len(events))
         # TODO: make one function to merge events
         self.module_events = self._merge_events(
             self._merge_events(events[0], events[1]), events[2])
+        print("past merge events")
 
-    def _smooth(self, channel, chunk_size, noise_array):
+    def _smooth(self, channel, chunk_size, noisefile):
+        # reduced_noise = nr.reduce_noise(audio_clip = channel, noise_clip=noise_array, verbose=True)
+
         new_channel = []
 
         new_len = self.frame_total//chunk_size
@@ -128,9 +139,10 @@ class Module:
             e1[i].append(False)
         for i in range(len(e2)):
             e2[i].append(False)
-
+        print("adding falses")
         e_merge = []
         # Merge two event lists (e1 and e2)
+        print(len(e1))
         for i in range(len(e1)):
             if (e1[i][2] == False):
                 # Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
@@ -162,7 +174,7 @@ class Module:
                     # print("Merged: ", merged)
 
                     e_merge.append(merged)
-
+        print("past merge 1")
         for i in range(len(e2)):
             if (e2[i][2] == False):
                 # Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
@@ -186,9 +198,25 @@ class Module:
                     merged.append(min(e_overlap[0], e2[i][0]))
                     merged.append(max(e_overlap[1], e2[i][1]))
                     e_merge.append(merged)
-        return e_merge
+        return e_merge 
 
-    
+    def _return_overlap(self, event_start, event_end, e_list):
+        # print("return overlap")
+        # print("event_start, event_end: ", event_start, event_end)
+        # print("e_list passed:", e_list)
+        for k in e_list:
+            if (self._overlap(event_start, event_end, k[0], k[1]) and k[2] == False):
+                # print("First check")
+                # Check if it shares more than 65% of the shorter one
+                min_shared = ceil(
+                    0.65 * min(k[1] - k[0], event_end-event_start))
+                if (min(k[1], event_end) - max(k[0], event_start) >= min_shared):
+                    # Return true and the index of k in e_list
+                    #print("return_overlap[1] is: ", e_list.index(k))
+                    return (True, e_list.index(k))
+        # Didn't find any overlaps
+        return (False, 0)
+
     #TODO: This should merged with the above function
     def _overlap(self, a_start, a_end, b_start, b_end):
         if (b_start < a_start and b_end < a_start):
@@ -215,8 +243,12 @@ class Module:
         for numLocalMax in np.nditer(maxima):
             sum_local_max += numpy_arr[numLocalMax]
 
+        avg_max = sum_local_max / len(maxima)
+        avg_min = sum_local_min / len(minima)
+        range_diff = avg_max - avg_min
+
         # Calculates threshold value
-        threshold_vol = (sum_local_min + sum_local_max) / (len(maxima) + len(minima))
+        threshold_vol = (sum_local_min + sum_local_max) / (len(maxima) + len(minima)) + range_diff/2
         # print(threshold_vol)
 
         return threshold_vol
@@ -237,7 +269,7 @@ class Module:
         #ADD FEATURE: Coallesce short events that are very close together
         return events
 
-    def determineVolumes(self,start_index, end_index, c1, c2, c3):
+    def determineVolumes(self, start_index, end_index):
         volumes = []
 
         v1 = 0
@@ -245,9 +277,9 @@ class Module:
         v3 = 0
 
         for i in range(start_index, end_index):
-            v1 += c1[i]
-            v2 += c2[i]
-            v3 += c3[i]
+            v1 += self.channels[0][i]
+            v2 += self.channels[1][i]
+            v3 += self.channels[2][i]
 
         v1 = v1/(end_index - start_index)
         v2 = v2/(end_index - start_index)
@@ -259,17 +291,17 @@ class Module:
 
         return volumes
 
-    def convertToVolumeList(self,event_list, c1, c2, c3):
+    def convertToVolumeList(self):
 
         volumeList = []
 
         start_id = 0
         end_id = 0
 
-        for i in range(len(event_list)):
-            start_id = event_list[i][0]
-            end_id = event_list[i][1]
+        for i in range(len(self.module_events)):
+            start_id = self.module_events[i][0]
+            end_id = self.module_events[i][1]
 
-            volumeList.append(self.determineVolumes(start_id, end_id, c1, c2, c3))
+            volumeList.append(self.determineVolumes(start_id, end_id))
 
         return volumeList
