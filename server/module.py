@@ -20,14 +20,6 @@ def get_modules(timeStamp):
         modules.append(Module(timeStamp, i))
     return modules
 
-def drawPlot(channel, plotId):
-    plot = plt.figure(plotId)
-    plt.plot(range(len(channel)), channel)
-    plt.xlabel('Time')
-    plt.ylabel('Amplitude')
-    plt.savefig('./static/img/plot.png')
-    return plot
-
 class Module:
     def __init__(self, timeStamp, moduleID):
         self.timeStamp = timeStamp
@@ -48,6 +40,7 @@ class Module:
             self.channels[i] = self._smooth(self.channels[i], self.chunk_size, self.noisefile)
         print(self.channels)
         self.find_module_events()
+
     def read_files(self, timeStamp, clear_after_read=False):
         file_list = os.listdir(UPLOADS_PATH)
         for file_name in file_list:
@@ -61,23 +54,34 @@ class Module:
                     if (clear_after_read):
                         os.remove(os.path.join(UPLOADS_PATH, file_name))
                         os.remove(file_info[2])
-    
-    def process_files(self):
-        print(len(self.channels))
-        for i in range(len(self.channels)):
-            try:  # Converts stereo to mono audio
-                self.channels[i] = np.abs(self.channels[i][:, 0]/2) + np.abs(self.channels[i][:, 1]/2)
-            except:
-                self.channels[i] = np.abs(self.channels[i][:])
-            # Reduces number of samples
-            
 
-    def read_noise(self, clear_after_read = False):
+     def _read_noise(self, clear_after_read = False):
         for file_name in os.listdir(NOISE_PATH):
             if re.match(r".*\.wav", file_name):
                     sample_rate, self.noisefile = read(os.path.join(NOISE_PATH, file_name))
                     if (clear_after_read):
                         os.remove(os.path.join(UPLOADS_PATH, file_name))
+
+    def process_files(self):
+        print(len(self.channels))
+        self._read_noise()
+        for i in range(len(self.channels)):
+            try:  # Converts stereo to mono audio
+                reduced_noise = nr.reduce_noise(audio_clip=self.channels[i], noise_clip=self.noisefile, verbose=True)
+                self.channels[i] = np.abs(reduced_noise[:, 0]/2) + np.abs(reduced_noise[:, 1]/2)
+            except:
+                self.channels[i] = np.abs(reduced_noise[:])
+            # Reduces number of samples
+            
+    # Backup copy of PROCESS FILES without noise reduction:    
+    # def process_files(self):
+    #     print(len(self.channels))
+    #     for i in range(len(self.channels)):
+    #         try:  # Converts stereo to mono audio
+    #             self.channels[i] = np.abs(self.channels[i][:, 0]/2) + np.abs(self.channels[i][:, 1]/2)
+    #         except:
+    #             self.channels[i] = np.abs(self.channels[i][:])
+    #         # Reduces number of samples
 
     def process_noise(self):
         try:
