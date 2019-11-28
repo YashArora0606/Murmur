@@ -2,7 +2,7 @@
 Config file with recording settings 
 
 """
-UPLOAD_URL = 'https://9c7b55de.ngrok.io/listen'
+UPLOAD_URL = 'http://666cd15f.ngrok.io/listen'
 
 DEVICE = 'pi'
 MIC_RATE = 44100
