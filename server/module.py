@@ -52,14 +52,15 @@ class Module:
     def process_files(self):
         print(len(self.channels))
         for i, channel in enumerate(self.channels):
+            reduced_noise = nr.reduce_noise(audio_clip = channel, noise_clip= self.noisefile, verbose=True)
             try:  # Converts stereo to mono audio
-                channel = np.abs(channel[:, 0]/2) + np.abs(channel[:, 1]/2)
+                channel = np.abs(reduced_noise[:, 0]/2) + np.abs(reduced_noise[:, 1]/2)
             except:
-                channel = np.abs(channel[:])
+                channel = np.abs(reduced_noise[:])
             # Reduces number of samples
             print(i, len(channel))
             try:
-                channel = channel[::len(channel)//(self.frame_total-1)]
+                channel = reduced_noise[::len(reduced_noise)//(self.frame_total-1)]
             except:
                 pass
 
@@ -90,13 +91,12 @@ class Module:
             self._merge_events(events[0], events[1]), events[2])
 
     def _smooth(self, channel, chunk_size, noise_array):
-        reduced_noise = nr.reduce_noise(audio_clip = np.asarray(channel), noise_clip=noise_array, verbose=True)
         new_channel = []
 
         new_len = self.frame_total//chunk_size
         for i in range(new_len + 1):
             total = 0
-            for val in reduced_noise[i*chunk_size: i*chunk_size + chunk_size]:
+            for val in channel[i*chunk_size: i*chunk_size + chunk_size]:
                 total += val
             total /= chunk_size
             new_channel.append(total)
