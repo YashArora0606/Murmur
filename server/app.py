@@ -4,6 +4,7 @@ import module
 import re
 from flask import *
 from functions import *
+import matplotlib.pyplot as plt
 
 ###############################################################################
 # OBJECTS
@@ -48,7 +49,7 @@ times = [] # list of times of files in folder
 tdelta = 3.0 # refresh delay
 FILE_NAME = ''
 nSamples = 5
-zoom = 50
+zoom = 20
 modules = {} 
 
 # App initialization
@@ -79,7 +80,8 @@ def update():
 	print(modules)
 	
 	mostRecent = modules[max(modules.keys())]
-	grid = Module.convertToVolumeList(Module.find_module_events(mostRecent[0], mostRecent[1], mostRecent[2]), mostRecent[0], mostRecent[1], mostRecent[2])
+	for mod in mostRecent:
+		grid.append(mod.convertToVolumeList(mod.module_events))
 
 	# grid = Module.convertToVolumeList(Module.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
 	# convert(grid)
@@ -124,6 +126,7 @@ def upload():
 def index():
 	global grid, tdelta, nSamples
 	update()
+	print("Past update")
 	# print_grid()
 	points = list(map(relative_location, grid))
 	for display in points:

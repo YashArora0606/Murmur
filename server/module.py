@@ -1,3 +1,4 @@
+
 import numpy as np
 import sys
 from scipy.io.wavfile import read
@@ -14,8 +15,18 @@ np.set_printoptions(threshold=sys.maxsize)
 def get_modules(timeStamp):
     modules = []
     for i in range(2):
+        print("timeStamp", timeStamp)
+        print("module", i)
         modules.append(Module(timeStamp, i))
     return modules
+
+def drawPlot(channel, plotId):
+    plot = plt.figure(plotId)
+    plt.plot(range(len(channel)), channel)
+    plt.xlabel('Time')
+    plt.ylabel('Amplitude')
+    plt.savefig('./static/img/plot.png')
+    return plot
 
 class Module:
     def __init__(self, timeStamp, moduleID):
@@ -24,24 +35,28 @@ class Module:
         self.channels = [[], [], []]
         self.noisefile = []
         self.frame_total = 1000
-        self.chunk_size = 1
+        self.chunk_size = 100
         self.num_sounds = 0
-        self.zoom = 50
+        self.zoom = 20
         self.module_events = []
 
         self.read_files(self.timeStamp)
         self.process_files()
-
+        self.frame_total = len(self.channels[0])
+        print("past processing")
         for channel in self.channels:
             channel = self._smooth(channel, self.chunk_size, self.noisefile)
+        print("past smoothing")
 
+        self.find_module_events()
+        print("past find module events")
     def read_files(self, timeStamp, clear_after_read=False):
         file_list = os.listdir(UPLOADS_PATH)
         for file_name in file_list:
             # print(file_list)
             if re.match(r".*\.wav", file_name):
                 file_info = file_name.split("-")
-                # print(file_info)
+                print(file_info)
                 if file_info[2] == str(timeStamp) and file_info[0] == str(self.moduleID):
                     sample_rate, self.channels[int(file_info[1])] = read(
                         os.path.join(UPLOADS_PATH, file_name))
@@ -81,22 +96,23 @@ class Module:
     def find_module_events(self):
         module_threshold = (self._find_event_thresh(self.channels[0]) + self._find_event_thresh(
             self.channels[1]) + self._find_event_thresh(self.channels[2]))/3
-
+        print("past find threshholds")
         events = [self._find_mic_events(
             channel, module_threshold) for channel in self.channels]
-
+        print("past find mic events", len(events))
         # TODO: make one function to merge events
         self.module_events = self._merge_events(
             self._merge_events(events[0], events[1]), events[2])
+        print("past merge events")
 
-    def _smooth(self, channel, chunk_size, noise_array):
-        reduced_noise = nr.reduce_noise(audio_clip = channel, noise_clip=noise_array, verbose=True)
+    def _smooth(self, channel, chunk_size, noisefile):
+        # reduced_noise = nr.reduce_noise(audio_clip = channel, noise_clip=noise_array, verbose=True)
         new_channel = []
 
         new_len = self.frame_total//chunk_size
         for i in range(new_len + 1):
             total = 0
-            for val in reduced_noise[i*chunk_size: i*chunk_size + chunk_size]:
+            for val in channel[i*chunk_size: i*chunk_size + chunk_size]:
                 total += val
             total /= chunk_size
             new_channel.append(total)
@@ -112,13 +128,14 @@ class Module:
             e1[i].append(False)
         for i in range(len(e2)):
             e2[i].append(False)
-
+        print("adding falses")
         e_merge = []
         # Merge two event lists (e1 and e2)
+        print(len(e1))
         for i in range(len(e1)):
             if (e1[i][2] == False):
                 # Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
-                if (_return_overlap(e1[i][0], e1[i][1], e2)[0] == False):
+                if (self._return_overlap(e1[i][0], e1[i][1], e2)[0] == False):
                     # print("No conflict")
                     # print("")
                     e_merge.append(e1[i][0:2])
@@ -132,9 +149,9 @@ class Module:
                     e1[i][2] = True
 
                     # overlapped event:
-                    e_overlap = e2[_return_overlap(e1[i][0], e1[i][1], e2)[1]]
+                    e_overlap = e2[self._return_overlap(e1[i][0], e1[i][1], e2)[1]]
                     # print("return_overlap is: ", return_overlap(e1[i][0], e1[i][1], e2))
-                    e2[_return_overlap(e1[i][0], e1[i][1], e2)[1]][2] = True
+                    e2[self._return_overlap(e1[i][0], e1[i][1], e2)[1]][2] = True
                     # print("e_overlap is: ", e_overlap)
 
                     # Add to the merged event list
@@ -146,11 +163,11 @@ class Module:
                     # print("Merged: ", merged)
 
                     e_merge.append(merged)
-
+        print("past merge 1")
         for i in range(len(e2)):
             if (e2[i][2] == False):
                 # Check if there is a overlapping event in the second list, if not, append the event and mark e1[i] as true
-                if (_return_overlap(e2[i][0], e2[i][1], e1)[0] == False):
+                if (self._return_overlap(e2[i][0], e2[i][1], e1)[0] == False):
                     # print("No conflict")
                     e_merge.append(e2[i][0:2])
                     e2[i][2] = True
@@ -163,14 +180,14 @@ class Module:
                     e2[i][2] = True
 
                     # overlapped event:
-                    e_overlap = e1[_return_overlap(e2[i][0], e2[i][1], e1)[1]]
-                    e1[_return_overlap(e2[i][0], e2[i][1], e1)[1]][2] = True
+                    e_overlap = e1[self._return_overlap(e2[i][0], e2[i][1], e1)[1]]
+                    e1[self._return_overlap(e2[i][0], e2[i][1], e1)[1]][2] = True
 
                     # Add to the merged event list
                     merged.append(min(e_overlap[0], e2[i][0]))
                     merged.append(max(e_overlap[1], e2[i][1]))
                     e_merge.append(merged)
-        return e_merge
+        return e_merge 
 
     def _return_overlap(self, event_start, event_end, e_list):
         # print("return overlap")
@@ -185,9 +202,9 @@ class Module:
                 if (min(k[1], event_end) - max(k[0], event_start) >= min_shared):
                     # Return true and the index of k in e_list
                     #print("return_overlap[1] is: ", e_list.index(k))
-                    return True, e_list.index(k)
+                    return (True, e_list.index(k))
         # Didn't find any overlaps
-        return False, 0
+        return (False, 0)
     #TODO: This should merged with the above function
     def _overlap(self, a_start, a_end, b_start, b_end):
         if (b_start < a_start and b_end < a_start):
