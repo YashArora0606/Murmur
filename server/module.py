@@ -38,7 +38,7 @@ class Module:
 
         for i in range(len(self.channels)):
             self.channels[i] = self._smooth(self.channels[i], self.chunk_size, self.noisefile)
-        print(self.channels)
+        # print(self.channels)
         self.find_module_events()
 
     def read_files(self, timeStamp, clear_after_read=False):
@@ -53,7 +53,6 @@ class Module:
                         os.path.join(UPLOADS_PATH, file_name))
                     if (clear_after_read):
                         os.remove(os.path.join(UPLOADS_PATH, file_name))
-                        os.remove(file_info[2])
 
     def _read_noise(self, clear_after_read = False):
         for file_name in os.listdir(NOISE_PATH):
@@ -66,7 +65,7 @@ class Module:
         print(len(self.channels))
         self._read_noise()
         for i in range(len(self.channels)):
-            print(self.channels[i])
+            # print(self.channels[i])
             # reduced_noise = nr.reduce_noise(audio_clip=self.channels[i], noise_clip=self.noisefile, verbose=True)
             try:  # Converts stereo to mono audio
                 self.channels[i] = np.abs(self.channels[i][:, 0]/2) + np.abs(self.channels[i][:, 1]/2)
