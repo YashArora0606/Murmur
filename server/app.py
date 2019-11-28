@@ -50,7 +50,7 @@ tdelta = 3.0 # refresh delay
 FILE_NAME = ''
 nSamples = 5
 zoom = 20
-modules = {} 
+modules = {}
 
 # App initialization
 app = Flask(__name__)
@@ -76,7 +76,7 @@ def update():
 
 	for time in times:
 		modules[time] = module.get_modules(time) # list of Modules
-		
+
 	grid = []
 	try:
 		mostRecent = modules[max(modules.keys())]
@@ -93,7 +93,7 @@ def update():
 	else:
 		nSamples = 1
 
-	
+
 
 	# module.read_files(times)
 	# module.process_files()
@@ -116,7 +116,7 @@ def generate_data(points):
 	return Data(nSamples, average, points[0].time)
 
 ###############################################################################
-# ROUTES 
+# ROUTES
 ###############################################################################
 # Upload
 @app.route('/upload', methods = ['GET', 'POST'])
