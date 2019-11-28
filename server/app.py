@@ -77,12 +77,13 @@ def update():
 	for time in times:
 		modules[time] = module.get_modules(time) # list of Modules
 		
+	grid = []
 	mostRecent = modules[max(modules.keys())]
 	for mod in mostRecent:
 		grid.append(mod.convertToVolumeList())
 
 	# grid = Module.convertToVolumeList(Module.find_module_events(smooth1, smooth2, smooth3), smooth1, smooth2, smooth3)
-	# convert(grid)
+	convert(grid)
 
 	nSamples = len(grid)
 

@@ -55,7 +55,7 @@ class Module:
                         os.remove(os.path.join(UPLOADS_PATH, file_name))
                         os.remove(file_info[2])
 
-     def _read_noise(self, clear_after_read = False):
+    def _read_noise(self, clear_after_read = False):
         for file_name in os.listdir(NOISE_PATH):
             if re.match(r".*\.wav", file_name):
                     sample_rate, self.noisefile = read(os.path.join(NOISE_PATH, file_name))
@@ -66,11 +66,12 @@ class Module:
         print(len(self.channels))
         self._read_noise()
         for i in range(len(self.channels)):
+            print(self.channels[i])
+            # reduced_noise = nr.reduce_noise(audio_clip=self.channels[i], noise_clip=self.noisefile, verbose=True)
             try:  # Converts stereo to mono audio
-                reduced_noise = nr.reduce_noise(audio_clip=self.channels[i], noise_clip=self.noisefile, verbose=True)
-                self.channels[i] = np.abs(reduced_noise[:, 0]/2) + np.abs(reduced_noise[:, 1]/2)
+                self.channels[i] = np.abs(self.channels[i][:, 0]/2) + np.abs(self.channels[i][:, 1]/2)
             except:
-                self.channels[i] = np.abs(reduced_noise[:])
+                self.channels[i] = np.abs(self.channels[i][:])
             # Reduces number of samples
             
     # Backup copy of PROCESS FILES without noise reduction:    
