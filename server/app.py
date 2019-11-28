@@ -133,6 +133,8 @@ def index():
 	update()
 	print("Past update")
 	# print_grid()
+	############################################################################
+	# TODO: Only take the most recent recordings and put them in a Sound object, ignore all others
 	for elem in grid:
 		points = list(map(relative_location, elem))
 	for display in points:
